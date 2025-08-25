@@ -1,0 +1,135 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run dev server",
+            "type": "shell",
+            "command": "${workspaceFolder}/backend/.venv/bin/python",
+            "windows": {
+                "command": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe"
+            },
+            "args": [
+                "-m",
+                "uvicorn",
+                "app.main:app",
+                "--reload"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run prod server",
+            "type": "shell",
+            "command": "gunicorn",
+            "args": [
+                "-k",
+                "uvicorn.workers.UvicornWorker",
+                "-w",
+                "4",
+                "-b",
+                "0.0.0.0:8000",
+                "--timeout",
+                "60",
+                "--keep-alive",
+                "5",
+                "--log-level",
+                "info",
+                "--access-logfile",
+                "-",
+                "app.main:app"
+            ],
+            "windows": {
+                "command": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe",
+                "args": [
+                    "-m",
+                    "uvicorn",
+                    "app.main:app",
+                    "--host",
+                    "0.0.0.0",
+                    "--port",
+                    "8000",
+                    "--workers",
+                    "4",
+                    "--log-level",
+                    "info"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run feeder",
+            "type": "shell",
+            "command": "${workspaceFolder}/backend/.venv/bin/python",
+            "windows": {
+                "command": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe"
+            },
+            "args": [
+                "-m",
+                "bin.feeder"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run dev cli script",
+            "type": "shell",
+            "command": "${workspaceFolder}/backend/.venv/bin/python",
+            "windows": {
+                "command": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe"
+            },
+            "args": [
+                "-m",
+                "bin.cli"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/backend"
+            },
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run dev ui-react",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "dev"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/ui-react"
+            },
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run dev ui-ng",
+            "type": "shell",
+            "command": "npm",
+            "args": [
+                "run",
+                "start"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/ui-ng"
+            },
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}

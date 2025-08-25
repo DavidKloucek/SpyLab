@@ -1,0 +1,51 @@
+<style>
+    main {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    .content {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    .centered-container {
+        width: 100%;
+        max-width: 1200px;
+        padding: 20px;
+    }
+
+    .left-side {
+        width: 100%;
+        max-width: 800px;
+        padding: 20px;
+    }
+
+    .spacer {
+        flex-grow: 1;
+    }
+
+</style>
+
+<main class="main">
+    <mat-toolbar color="primary">
+        <span>SpyLab</span>
+        <span class="spacer"></span>
+        <button mat-button routerLink="/">Home</button>
+    </mat-toolbar>
+    <div class="content">
+        <div class="left-side">
+
+            <div class="centered-container">
+                <div class="content">
+
+                    <router-outlet/>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>

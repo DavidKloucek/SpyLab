@@ -1,0 +1,32 @@
+.image-container {
+    position: relative;
+    display: inline-block;
+}
+.image {
+    max-width: 100%;
+    height: auto;
+    z-index: 99 !important;
+    position: relative;
+}
+.highlight-box {
+    position: absolute;
+    cursor: pointer;
+    z-index: 999 !important;
+    border-radius: 2px;
+    border-width: 2px;
+    border-style: solid;
+    opacity: 1;
+}
+.highlight-box:hover {
+    border-radius: 2px;
+    border-width: 2px;
+    border-style: solid;
+    opacity: 1;
+    cursor: pointer;
+}
+.highlight-box-curr {
+    border-width: 4px;
+}
+.highlight-box-curr:hover {
+    border-width: 4px;
+}
