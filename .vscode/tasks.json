@@ -130,6 +130,26 @@
             },
             "group": "build",
             "problemMatcher": []
+        },
+        {
+            "label": "orval: generate",
+            "type": "shell",
+            "command": "pnpm orval",
+            "options": {
+                "cwd": "${workspaceFolder}/ui-react"
+            },
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "orval: watch",
+            "type": "shell",
+            "command": "pnpm orval --watch",
+            "options": {
+                "cwd": "${workspaceFolder}/ui-react"
+            },
+            "isBackground": true,
+            "problemMatcher": []
         }
     ]
 }

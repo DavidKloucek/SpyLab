@@ -1,4 +1,3 @@
-from ast import List
 from datetime import datetime, timezone
 from typing import Optional, Union, Dict
 import numpy as np

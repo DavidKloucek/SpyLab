@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.face_repository import FaceRepository
 from app.face_service import FaceService
 import os
-from deepface import DeepFace  # type: ignore
 from app.face_region import FaceRegion
 from app.app_config import IMG_ORIG_DIR
 from wireup import service
@@ -24,7 +23,7 @@ class ImageFeeder:
 
         models = [
             # 'Facenet',
-            #'Facenet512',
+            # 'Facenet512',
             # 'VGG-Face',
             'ArcFace'
         ]
@@ -35,10 +34,11 @@ class ImageFeeder:
 
         new_files = []
         for f in os.listdir(IMG_ORIG_DIR):
-            if (f not in all_fns_db
+            if (
+                f not in all_fns_db
                 and f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp'))
                 and os.path.isfile(os.path.join(IMG_ORIG_DIR, f))
-                ):
+            ):
                 new_files.append(f)
 
         for fn in new_files:

@@ -6,25 +6,26 @@ from fastapi.middleware.cors import CORSMiddleware
 import wireup.integration
 import wireup.integration.fastapi
 from app.container import container
-from app.app_config import APP_TITLE, IMG_TEMP_DIR, IMG_ORIG_DIR
+from app.app_config import ALLOWED_ORIGINS, APP_TITLE, GQL_PATH, IMG_TEMP_DIR_URL_PATH, IMG_ORIG_DIR_URL_PATH, IMG_TEMP_DIR, IMG_ORIG_DIR
 from app.router import router
+from fastapi import FastAPI
+from strawberry.fastapi import GraphQLRouter
+from app.gql_schema import get_context, schema
+from app.container import container
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
         title=APP_TITLE
     )
-    app.mount("/preview", StaticFiles(directory=IMG_TEMP_DIR), name="preview")
-    app.mount("/source_img", StaticFiles(directory=IMG_ORIG_DIR), name="original")
+    app.mount(IMG_TEMP_DIR_URL_PATH, StaticFiles(
+        directory=IMG_TEMP_DIR), name="preview")
+    app.mount(IMG_ORIG_DIR_URL_PATH, StaticFiles(
+        directory=IMG_ORIG_DIR), name="original")
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:4200",
-            "http://localhost:9000",
-            "http://localhost:3000",
-            "http://localhost:5173"
-        ],
+        allow_origins=ALLOWED_ORIGINS,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -52,6 +53,9 @@ def create_app() -> FastAPI:
                 "statusCode": 500,
             },
         )
+
+    graphql_app = GraphQLRouter(schema, context_getter=get_context)
+    app.include_router(graphql_app, prefix=GQL_PATH)
 
     return app
 

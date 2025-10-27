@@ -1,14 +1,20 @@
 from wireup import Injected
-from typing import Any, List
-from fastapi import APIRouter, File, Form, HTTPException, Response, UploadFile
-from fastapi.responses import JSONResponse
+from typing import Annotated, Any, List
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel
-from app import face_repository, face_service
+from app import face_service
+from app.auth_service import AuthService, TokenPayload, oauth2_scheme
 from app.dashboard_service import DashboardService, DashStats
 from app.face_service import AnalyzeBox, FaceItem, FaceSimilarItem, NoFaceFound
 from fastapi import Request
 from app.face_service import FaceService
-from app.face_repository import FaceRepository
+from app.user_repository import UserRepository
+
+"""
+todo: verify password
+todo: refresh tokens
+todo: protect routes
+"""
 
 router = APIRouter()
 
@@ -29,10 +35,11 @@ class DetailData(BaseModel):
 
 
 @router.get("/detail")
-async def detail_image(request: Request,
-                       id: int,
-                       face_service: Injected[face_service.FaceService],
-                       ) -> DetailData:
+async def detail_image(
+    request: Request,
+    id: int,
+    face_service: Injected[face_service.FaceService],
+) -> DetailData:
 
     data = await face_service.get_by_id(id)
 
@@ -54,11 +61,14 @@ async def detail_image(request: Request,
 
 
 @router.get("/list")
-async def read_random(request: Request,
-                      response: Response,
-                      face_service: Injected[FaceService],
-                      search: str = '',
-                      limit: int = 20,) -> List[FaceItemResponse]:
+async def read_random(
+    request: Request,
+    response: Response,
+    face_service: Injected[FaceService],
+    search: str = '',
+    limit: int = 20,
+) -> List[FaceItemResponse]:
+
     res = await face_service.find_list(limit, search)
     return [
         FaceItemResponse(
@@ -114,11 +124,14 @@ async def analyze_image(
 
 
 @router.get("/similar-to-id")
-async def find_similar_id(request: Request,
-                          face_service: Injected[FaceService],
-                          id: int,
-                          model: str,
-                          metric: str = 'cosine',) -> List[FaceSimilarItemResponse]:
+async def find_similar_id(
+    request: Request,
+    face_service: Injected[FaceService],
+    id: int,
+    model: str,
+    metric: str = 'cosine',
+) -> List[FaceSimilarItemResponse]:
+
     res = await face_service.find_similar_by_face_id(id=id, model=model, metric=metric, limit=50)
 
     return [
@@ -131,13 +144,15 @@ async def find_similar_id(request: Request,
 
 
 @router.post("/similar-to-image")
-async def find_similar_image(request: Request,
-                             image: UploadFile,
-                             face_service: Injected[FaceService],
-                             x: int = Form(...),
-                             y: int = Form(...),
-                             w: int = Form(...),
-                             h: int = Form(...),) -> List[FaceSimilarItemResponse]:
+async def find_similar_image(
+    request: Request,
+    image: UploadFile,
+    face_service: Injected[FaceService],
+    x: int = Form(...),
+    y: int = Form(...),
+    w: int = Form(...),
+    h: int = Form(...),
+) -> List[FaceSimilarItemResponse]:
     res = await face_service.find_similar_by_image(file=image, x=x, y=y, w=w, h=h, limit=100)
 
     return [
@@ -157,32 +172,67 @@ async def dashboard(
     return data
 
 
-@router.get("/di-test")
-async def di_test(
-    face_repository: Injected[FaceRepository],
-    face_service: Injected[FaceService],
-):
-    return JSONResponse(content={
-        "face_repository": id(face_repository),
-        "face_service": id(face_service),
-    })
+class UserItem(BaseModel):
+    id: int
+    email: str
 
 
-@router.get("/list-test")
-async def list_test(request: Request,
-                    response: Response,
-                    face_service: Injected[FaceService],
-                    search: str = '',
-                    _start: int = 0,
-                    _end: int = 20) -> List[Any]:
+@router.get("/users")
+async def user_list(
+    request: Request,
+    response: Response,
+    user_repo: Injected[UserRepository],
+    _start: int = 0,
+    _end: int = 20
+) -> List[Any]:
+
+    data = await user_repo.find_all(_start, _end)
     res = [
-        {
-            "model": f"Model {i}-{i*i}",
-            "id": i
-        }
-        for i in range(100) if i >= _start and i <= _end
+        UserItem(id=u.id, email=u.email)
+        for u in data
     ]
+
     total_count = len(res)
     response.headers["X-Total-Count"] = str(total_count)
     response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
     return res
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@router.post("/login")
+async def login(
+    request: LoginRequest,
+    user_repo: Injected[UserRepository],
+    auth: Injected[AuthService],
+):
+
+    user = await user_repo.find_by_email(request.email)
+    if not user:
+        raise HTTPException(
+            status_code=401, detail="Invalid email or password")
+
+    token = auth.create_access_token(user)
+    return {"token": token, "token_type": "bearer"}
+
+
+class MeDto(BaseModel):
+    id: int
+    email: str
+
+
+@router.get("/me")
+async def get_me(
+    user_repo: Injected[UserRepository],
+    auth: Injected[AuthService],
+    token: str = Depends(oauth2_scheme)
+) -> MeDto:
+    jwt = auth.decode_access_token(token)
+    user = await user_repo.get_by_id(jwt.sub)
+    return MeDto(
+        id=user.id,
+        email=user.email,
+    )
