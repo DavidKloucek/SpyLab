@@ -1,9 +1,9 @@
 from wireup import Injected
-from typing import Annotated, Any, List
+from typing import Any, List
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel
 from app import face_service
-from app.auth_service import AuthService, TokenPayload, oauth2_scheme
+from app.auth_service import AuthService, oauth2_scheme
 from app.dashboard_service import DashboardService, DashStats
 from app.face_service import AnalyzeBox, FaceItem, FaceSimilarItem, NoFaceFound
 from fastapi import Request

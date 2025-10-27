@@ -7,7 +7,7 @@ import { useCustomMutation } from "@refinedev/core";
 import { Modal, Table, Tooltip } from "antd";
 import { FaceBox, FacePicker } from "../../components/FacePicker";
 import { useEffect, useState } from "react";
-import { ImageUpload } from "../../components/ImageUpload";
+import { FaceSearchPanel } from "../../components/FaceSearchPanel";
 import { FaceSimilarItemResponse, getFindSimilarImageApiSimilarToImagePostUrl } from "../../api/generated";
 
 export const FaceFinderList = () => {
@@ -79,7 +79,7 @@ export const FaceFinderList = () => {
                 </>
             )}
         </Modal >
-        <ImageUpload
+        <FaceSearchPanel
             onSelectedImage={(x) => {
                 setSelectedBox(null)
                 setSimilarList([])
@@ -89,12 +89,12 @@ export const FaceFinderList = () => {
                 setSelectedBox(x)
             }}
         />
-        <List>
+        <List title={<>Similar faces</>}>
             <Table
                 {...tableProps}
                 dataSource={similarList}
                 rowKey="id"
-                loading={mutation.isPending}
+                loading={mutation.mutation.isPending}
             >
                 <Table.Column dataIndex="fn" title={"Filename"} />
                 <Table.Column
@@ -106,7 +106,7 @@ export const FaceFinderList = () => {
                 />
                 <Table.Column
                     dataIndex="confidence"
-                    title={"Face?"}
+                    title={"Is a face"}
                     render={(value) => {
                         return value + "%"
                     }}

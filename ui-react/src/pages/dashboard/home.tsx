@@ -1,12 +1,12 @@
-import { Alert, Skeleton } from "antd"
-import { Card, Row, Col, Statistic, Tooltip, Tag, Typography, Divider, Space } from "antd";
+import { Skeleton } from "antd"
+import { Card, Row, Col, Statistic, Tooltip, Tag, Typography, Space } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { useDashboardStats } from "../../services/apiService";
 const { Title, Text } = Typography;
 
 export const Home = () => {
 
-    const stats = useDashboardStats()
+    const { query, result } = useDashboardStats()
 
     return <>
         <div>
@@ -14,7 +14,7 @@ export const Home = () => {
 
                 <Title level={3} style={{ marginBottom: 16 }}>Statistics</Title>
 
-                {stats.isLoading || !stats.data ? (
+                {query.isLoading || !result.data ? (
                     <Skeleton active paragraph={{ rows: 2 }} />
                 ) : (
                     <Row gutter={[16, 16]}>
@@ -23,14 +23,14 @@ export const Home = () => {
                                 title={
                                     null
                                 }
-                                value={stats.data?.data.face_count_total}
+                                value={query.data?.data.face_count_total ?? 0}
                                 icon={<UserOutlined />}
                                 tooltip="Total number of all stored embeddings in the database"
                                 color="#1677ff"
                                 bg="linear-gradient(135deg, rgba(22,119,255,0.18), rgba(22,119,255,0.06))"
                                 trend={
-                                    <Tag color={stats.data?.data.face_count_24h > 0 ? "green" : undefined} style={{ borderRadius: 999 }}>
-                                        +<strong>{stats.data?.data.face_count_24h}</strong> in the last 24 hours
+                                    <Tag color={(query.data?.data.face_count_24h ?? 0) > 0 ? "green" : undefined} style={{ borderRadius: 999 }}>
+                                        +<strong>{query.data?.data.face_count_24h ?? 0}</strong> in the last 24 hours
                                     </Tag>
                                 }
                             />

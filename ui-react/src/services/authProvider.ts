@@ -1,7 +1,5 @@
 import type { AuthProvider } from "@refinedev/core";
-import axiosClient, { getAccessToken, setAccessToken } from "./apiClient";
-
-//export const TOKEN_KEY = "refine-auth";
+import axiosClient, { setAccessToken } from "./apiClient";
 
 type LoggedUser = {
     id: string;
@@ -10,8 +8,8 @@ type LoggedUser = {
 }
 
 const loggedUser = {
-    data: null as null|string,
-    set: (user: LoggedUser|null) => {
+    data: null as null | string,
+    set: (user: LoggedUser | null) => {
         loggedUser.data = user === null ? null : JSON.stringify(user)
         //localStorage.setItem("user", JSON.stringify(user));
     },
@@ -26,39 +24,45 @@ const loggedUser = {
 }
 
 export const authProvider: AuthProvider = {
-    
+
     login: async ({ email, password }) => {
+        try {
+            const req = await axiosClient.post("/api/login", {
+                email,
+                password
+            }, {
+                withCredentials: true
+            });
 
-        const req = await axiosClient.post("/api/login", {
-            email,
-            password
-        }, {
-            withCredentials: true
-        })
+            setAccessToken({
+                token: req.data.token,
+                exp: Math.floor(Date.now() / 1000) + req.data.expires_in
+            });
 
-        setAccessToken({
-            token: req.data.token,    
-            exp: Math.floor(Date.now() / 1000) + req.data.expires_in
-        });
+            const meReq = await axiosClient.get("/api/me", {
+                withCredentials: true
+            });
+            const me = meReq.data;
 
-        const meReq = await axiosClient.get("/api/me", {
-            withCredentials: true
-        })
-        const me = meReq.data;
-        
-        loggedUser.set(me as LoggedUser)
-        return {
-            success: true,
-            redirectTo: "/",
+            loggedUser.set(me as LoggedUser);
+
+            return {
+                success: true,
+                redirectTo: "/",
+            };
+        } catch (err) {
+            const error = err as any;
+            const message = error?.response?.data?.message || error.message || "Neznámá chyba";
+            const status = error?.response?.data?.statusCode || error.statusCode || 500;
+
+            return {
+                success: false,
+                error: {
+                    name: "LoginError",
+                    message: `${message} (status code: ${status})`,
+                },
+            };
         }
-
-        return {
-            success: false,
-            error: {
-                name: "LoginError",
-                message: "Invalid username or password",
-            },
-        };
     },
     logout: async () => {
         loggedUser.data = null
@@ -80,7 +84,9 @@ export const authProvider: AuthProvider = {
             redirectTo: "/login",
         };
     },
-    getPermissions: async () => null,
+    getPermissions: async () => {
+        return null
+    },
     getIdentity: async () => {
         const token = loggedUser.get()
         if (token) {
@@ -92,7 +98,13 @@ export const authProvider: AuthProvider = {
         return null;
     },
     onError: async (error) => {
-        console.error(error);
-        return { error };
+        if (error.status === 401 || error.status === 403) {
+            return {
+                logout: true,
+                redirectTo: "/login",
+                error,
+            };
+        }
+        return {};
     },
 };

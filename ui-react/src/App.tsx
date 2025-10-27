@@ -4,8 +4,8 @@ import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 
 import {
     ErrorComponent,
-    ThemedLayoutV2,
-    ThemedSiderV2,
+    ThemedLayout,
+    ThemedSider,
     useNotificationProvider,
 } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
@@ -41,8 +41,8 @@ function App() {
                         <AntdApp>
                             <DevtoolsProvider>
                                 <Refine
-                                    dataProvider={dp}
                                     notificationProvider={useNotificationProvider}
+                                    dataProvider={dp}
                                     routerProvider={routerBindings}
                                     authProvider={authProvider}
                                     resources={[
@@ -50,15 +50,13 @@ function App() {
                                             name: "face-finder",
                                             list: "/face-finder",
                                             meta: {
+                                                label: "Face finder",
                                                 canDelete: true,
                                             },
                                         },
                                         {
                                             name: "users",
                                             list: "/users",
-                                            meta: {
-                                                canDelete: false,
-                                            },
                                         },
                                     ]}
                                     options={{
@@ -69,6 +67,14 @@ function App() {
                                             icon: null,
                                             text: "SpyLab",
                                         },
+                                        /*errorNotification: (error, values, resource) => {
+                                            const message = error?.response?.data?.message ?? error?.message ?? "Unknown error";
+                                            return {
+                                                message,
+                                                description: `Resource: ${resource?.name ?? "unknown"}`,
+                                                type: "error" as const,
+                                            };
+                                        },*/
                                     }}
                                 >
                                     <Routes>
@@ -78,12 +84,12 @@ function App() {
                                                     key="authenticated-inner"
                                                     fallback={<CatchAllNavigate to="/login" />}
                                                 >
-                                                    <ThemedLayoutV2
+                                                    <ThemedLayout
                                                         Header={Header}
-                                                        Sider={(props) => <ThemedSiderV2 {...props} fixed />}
+                                                        Sider={(props) => <ThemedSider {...props} fixed />}
                                                     >
                                                         <Outlet />
-                                                    </ThemedLayoutV2>
+                                                    </ThemedLayout>
                                                 </Authenticated>
                                             }
                                         >

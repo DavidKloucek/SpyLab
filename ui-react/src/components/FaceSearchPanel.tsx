@@ -17,7 +17,7 @@ interface TForm {
     file: UploadFile[]
 }
 
-export const ImageUpload = ({ onSelectedImage: onDone, onSelectedFaceBox: onSelectedFace }: ImageUploadProps) => {
+export const FaceSearchPanel = ({ onSelectedImage: onDone, onSelectedFaceBox: onSelectedFace }: ImageUploadProps) => {
     const form = useForm<TForm>({
         mode: "onChange",
         defaultValues: {
@@ -55,7 +55,7 @@ export const ImageUpload = ({ onSelectedImage: onDone, onSelectedFaceBox: onSele
         setSelectedImageStr(URL.createObjectURL(file))
         setSelectedBox(null)
         setBoxes([])
-        const res = await analyzeImgMut.mutateAsync({
+        const foundBoxes = await analyzeImgMut.mutateAsync({
             method: 'post',
             url: getAnalyzeImageApiAnalyzePostUrl(),
             config: {
@@ -63,9 +63,9 @@ export const ImageUpload = ({ onSelectedImage: onDone, onSelectedFaceBox: onSele
             },
             values: {
                 'file': file
-            },
+            }
         })
-        setBoxes(res.data.boxes.map((item) => ({
+        setBoxes(foundBoxes.data.boxes.map((item) => ({
             x: item.x,
             y: item.y,
             h: item.h,
@@ -113,7 +113,7 @@ export const ImageUpload = ({ onSelectedImage: onDone, onSelectedFaceBox: onSele
                     </Form.Item>
                 </form>
                 <div>
-                    <Spin spinning={analyzeImgMut.isPending} tip="Analyzing..">
+                    <Spin spinning={analyzeImgMut.mutation.isPending} tip="Analyzing..">
                         <FacePicker
                             imageUrl={selectedImageStr}
                             faceBoxList={boxes}

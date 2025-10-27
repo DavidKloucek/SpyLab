@@ -75,6 +75,19 @@ async function ensureRefreshed(): Promise<void> {
     await refreshPromise;
 }
 
+axiosClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const apiMessage = error?.response?.data?.message;
+        if (apiMessage) {
+            error.message = apiMessage;
+        }
+        console.log("error", error)
+        error.statusCode = error?.status
+        return Promise.reject(error);
+    }
+);
+
 axiosClient.interceptors.request.use(async (config: AuthConfig) => {
     const url = config.url ?? "";
 
