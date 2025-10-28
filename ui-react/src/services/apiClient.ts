@@ -78,12 +78,13 @@ async function ensureRefreshed(): Promise<void> {
 axiosClient.interceptors.response.use(
     (response) => response,
     (error) => {
+        console.log("error", error.message)
         const apiMessage = error?.response?.data?.message;
         if (apiMessage) {
             error.message = apiMessage;
         }
-        console.log("error", error)
         error.statusCode = error?.status
+        console.log("error", error.message)
         return Promise.reject(error);
     }
 );

@@ -5,8 +5,14 @@ export default defineConfig({
         input: 'http://localhost:8000/openapi.json',
         output: {
             target: 'src/api/generated.ts',
-            client: "fetch",
+            client: "axios",
             prettier: true,
+            override: {
+                mutator: {
+                    path: './src/api/orvalMutator.ts',
+                    name: 'orvalMutator',
+                },
+            },
         },
     },
 });

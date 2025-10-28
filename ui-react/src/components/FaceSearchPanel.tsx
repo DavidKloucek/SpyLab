@@ -1,11 +1,11 @@
 import { useCustomMutation } from "@refinedev/core";
-import { Upload, Form, Button, Card, Spin } from "antd";
+import { Upload, Form, Button, Card, Spin, } from "antd";
 import { FaceBox, FacePicker } from "./FacePicker";
 import { useForm } from "@refinedev/react-hook-form";
 import { useState } from "react";
 import { UploadOutlined } from "@ant-design/icons";
 import { Controller, SubmitHandler, UseFormReturn } from "react-hook-form";
-import { getAnalyzeImageApiAnalyzePostUrl, UploadImageResponse } from "../api/generated";
+import { UploadImageResponse } from "../api/generated";
 import { UploadFile } from "antd/lib";
 
 interface ImageUploadProps {
@@ -57,7 +57,7 @@ export const FaceSearchPanel = ({ onSelectedImage: onDone, onSelectedFaceBox: on
         setBoxes([])
         const foundBoxes = await analyzeImgMut.mutateAsync({
             method: 'post',
-            url: getAnalyzeImageApiAnalyzePostUrl(),
+            url: "/api/analyze",
             config: {
                 headers: { "Content-Type": "multipart/form-data" }
             },

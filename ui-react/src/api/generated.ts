@@ -4,6 +4,7 @@
  * SpyLab
  * OpenAPI spec version: 0.1.0
  */
+import { orvalMutator } from "./orvalMutator";
 export interface AnalyzeBox {
   x: number;
   y: number;
@@ -74,10 +75,30 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  token_type: "bearer";
+}
+
+export interface MeDto {
+  id: number;
+  email: string;
+}
+
 export interface UploadImageResponse {
   preview_url: string;
   source_url: string;
   boxes: AnalyzeBox[];
+}
+
+export interface UserItem {
+  id: number;
+  email: string;
 }
 
 export type ValidationErrorLocItem = string | number;
@@ -108,478 +129,195 @@ export type UserListApiUsersGetParams = {
   _end?: number;
 };
 
-/**
- * @summary Detail Image
- */
-export type detailImageApiDetailGetResponse200 = {
-  data: DetailData;
-  status: 200;
-};
-
-export type detailImageApiDetailGetResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
-
-export type detailImageApiDetailGetResponseComposite =
-  | detailImageApiDetailGetResponse200
-  | detailImageApiDetailGetResponse422;
-
-export type detailImageApiDetailGetResponse =
-  detailImageApiDetailGetResponseComposite & {
-    headers: Headers;
+export const getSpyLab = () => {
+  /**
+   * @summary Detail Image
+   */
+  const detailImageApiDetailGet = (params: DetailImageApiDetailGetParams) => {
+    return orvalMutator<DetailData>({
+      url: `/api/detail`,
+      method: "GET",
+      params,
+    });
   };
 
-export const getDetailImageApiDetailGetUrl = (
-  params: DetailImageApiDetailGetParams
-) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/detail?${stringifiedParams}`
-    : `/api/detail`;
-};
-
-export const detailImageApiDetailGet = async (
-  params: DetailImageApiDetailGetParams,
-  options?: RequestInit
-): Promise<detailImageApiDetailGetResponse> => {
-  const res = await fetch(getDetailImageApiDetailGetUrl(params), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data: detailImageApiDetailGetResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
-
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as detailImageApiDetailGetResponse;
-};
-
-/**
- * @summary Read Random
- */
-export type readRandomApiListGetResponse200 = {
-  data: FaceItemResponse[];
-  status: 200;
-};
-
-export type readRandomApiListGetResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
-
-export type readRandomApiListGetResponseComposite =
-  | readRandomApiListGetResponse200
-  | readRandomApiListGetResponse422;
-
-export type readRandomApiListGetResponse =
-  readRandomApiListGetResponseComposite & {
-    headers: Headers;
+  /**
+   * @summary Read Random
+   */
+  const readRandomApiListGet = (params?: ReadRandomApiListGetParams) => {
+    return orvalMutator<FaceItemResponse[]>({
+      url: `/api/list`,
+      method: "GET",
+      params,
+    });
   };
 
-export const getReadRandomApiListGetUrl = (
-  params?: ReadRandomApiListGetParams
-) => {
-  const normalizedParams = new URLSearchParams();
+  /**
+   * @summary Analyze Image
+   */
+  const analyzeImageApiAnalyzePost = (
+    bodyAnalyzeImageApiAnalyzePost: BodyAnalyzeImageApiAnalyzePost
+  ) => {
+    const formData = new FormData();
+    formData.append(`file`, bodyAnalyzeImageApiAnalyzePost.file);
 
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/list?${stringifiedParams}`
-    : `/api/list`;
-};
-
-export const readRandomApiListGet = async (
-  params?: ReadRandomApiListGetParams,
-  options?: RequestInit
-): Promise<readRandomApiListGetResponse> => {
-  const res = await fetch(getReadRandomApiListGetUrl(params), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data: readRandomApiListGetResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
-
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as readRandomApiListGetResponse;
-};
-
-/**
- * @summary Analyze Image
- */
-export type analyzeImageApiAnalyzePostResponse200 = {
-  data: UploadImageResponse;
-  status: 200;
-};
-
-export type analyzeImageApiAnalyzePostResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
-
-export type analyzeImageApiAnalyzePostResponseComposite =
-  | analyzeImageApiAnalyzePostResponse200
-  | analyzeImageApiAnalyzePostResponse422;
-
-export type analyzeImageApiAnalyzePostResponse =
-  analyzeImageApiAnalyzePostResponseComposite & {
-    headers: Headers;
+    return orvalMutator<UploadImageResponse>({
+      url: `/api/analyze`,
+      method: "POST",
+      headers: { "Content-Type": "multipart/form-data" },
+      data: formData,
+    });
   };
 
-export const getAnalyzeImageApiAnalyzePostUrl = () => {
-  return `/api/analyze`;
-};
-
-export const analyzeImageApiAnalyzePost = async (
-  bodyAnalyzeImageApiAnalyzePost: BodyAnalyzeImageApiAnalyzePost,
-  options?: RequestInit
-): Promise<analyzeImageApiAnalyzePostResponse> => {
-  const formData = new FormData();
-  formData.append(`file`, bodyAnalyzeImageApiAnalyzePost.file);
-
-  const res = await fetch(getAnalyzeImageApiAnalyzePostUrl(), {
-    ...options,
-    method: "POST",
-    body: formData,
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data: analyzeImageApiAnalyzePostResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
-
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as analyzeImageApiAnalyzePostResponse;
-};
-
-/**
- * @summary Find Similar Id
- */
-export type findSimilarIdApiSimilarToIdGetResponse200 = {
-  data: FaceSimilarItemResponse[];
-  status: 200;
-};
-
-export type findSimilarIdApiSimilarToIdGetResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
-
-export type findSimilarIdApiSimilarToIdGetResponseComposite =
-  | findSimilarIdApiSimilarToIdGetResponse200
-  | findSimilarIdApiSimilarToIdGetResponse422;
-
-export type findSimilarIdApiSimilarToIdGetResponse =
-  findSimilarIdApiSimilarToIdGetResponseComposite & {
-    headers: Headers;
+  /**
+   * @summary Find Similar Id
+   */
+  const findSimilarIdApiSimilarToIdGet = (
+    params: FindSimilarIdApiSimilarToIdGetParams
+  ) => {
+    return orvalMutator<FaceSimilarItemResponse[]>({
+      url: `/api/similar-to-id`,
+      method: "GET",
+      params,
+    });
   };
 
-export const getFindSimilarIdApiSimilarToIdGetUrl = (
-  params: FindSimilarIdApiSimilarToIdGetParams
-) => {
-  const normalizedParams = new URLSearchParams();
+  /**
+   * @summary Find Similar Image
+   */
+  const findSimilarImageApiSimilarToImagePost = (
+    bodyFindSimilarImageApiSimilarToImagePost: BodyFindSimilarImageApiSimilarToImagePost
+  ) => {
+    const formData = new FormData();
+    formData.append(`image`, bodyFindSimilarImageApiSimilarToImagePost.image);
+    formData.append(
+      `x`,
+      bodyFindSimilarImageApiSimilarToImagePost.x.toString()
+    );
+    formData.append(
+      `y`,
+      bodyFindSimilarImageApiSimilarToImagePost.y.toString()
+    );
+    formData.append(
+      `w`,
+      bodyFindSimilarImageApiSimilarToImagePost.w.toString()
+    );
+    formData.append(
+      `h`,
+      bodyFindSimilarImageApiSimilarToImagePost.h.toString()
+    );
 
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/similar-to-id?${stringifiedParams}`
-    : `/api/similar-to-id`;
-};
-
-export const findSimilarIdApiSimilarToIdGet = async (
-  params: FindSimilarIdApiSimilarToIdGetParams,
-  options?: RequestInit
-): Promise<findSimilarIdApiSimilarToIdGetResponse> => {
-  const res = await fetch(getFindSimilarIdApiSimilarToIdGetUrl(params), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data: findSimilarIdApiSimilarToIdGetResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
-
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as findSimilarIdApiSimilarToIdGetResponse;
-};
-
-/**
- * @summary Find Similar Image
- */
-export type findSimilarImageApiSimilarToImagePostResponse200 = {
-  data: FaceSimilarItemResponse[];
-  status: 200;
-};
-
-export type findSimilarImageApiSimilarToImagePostResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
-
-export type findSimilarImageApiSimilarToImagePostResponseComposite =
-  | findSimilarImageApiSimilarToImagePostResponse200
-  | findSimilarImageApiSimilarToImagePostResponse422;
-
-export type findSimilarImageApiSimilarToImagePostResponse =
-  findSimilarImageApiSimilarToImagePostResponseComposite & {
-    headers: Headers;
+    return orvalMutator<FaceSimilarItemResponse[]>({
+      url: `/api/similar-to-image`,
+      method: "POST",
+      headers: { "Content-Type": "multipart/form-data" },
+      data: formData,
+    });
   };
 
-export const getFindSimilarImageApiSimilarToImagePostUrl = () => {
-  return `/api/similar-to-image`;
-};
-
-export const findSimilarImageApiSimilarToImagePost = async (
-  bodyFindSimilarImageApiSimilarToImagePost: BodyFindSimilarImageApiSimilarToImagePost,
-  options?: RequestInit
-): Promise<findSimilarImageApiSimilarToImagePostResponse> => {
-  const formData = new FormData();
-  formData.append(`image`, bodyFindSimilarImageApiSimilarToImagePost.image);
-  formData.append(`x`, bodyFindSimilarImageApiSimilarToImagePost.x.toString());
-  formData.append(`y`, bodyFindSimilarImageApiSimilarToImagePost.y.toString());
-  formData.append(`w`, bodyFindSimilarImageApiSimilarToImagePost.w.toString());
-  formData.append(`h`, bodyFindSimilarImageApiSimilarToImagePost.h.toString());
-
-  const res = await fetch(getFindSimilarImageApiSimilarToImagePostUrl(), {
-    ...options,
-    method: "POST",
-    body: formData,
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data: findSimilarImageApiSimilarToImagePostResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
-
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as findSimilarImageApiSimilarToImagePostResponse;
-};
-
-/**
- * @summary Dashboard
- */
-export type dashboardApiDashboardGetResponse200 = {
-  data: DashStats;
-  status: 200;
-};
-
-export type dashboardApiDashboardGetResponseComposite =
-  dashboardApiDashboardGetResponse200;
-
-export type dashboardApiDashboardGetResponse =
-  dashboardApiDashboardGetResponseComposite & {
-    headers: Headers;
+  /**
+   * @summary Dashboard
+   */
+  const dashboardApiDashboardGet = () => {
+    return orvalMutator<DashStats>({ url: `/api/dashboard`, method: "GET" });
   };
 
-export const getDashboardApiDashboardGetUrl = () => {
-  return `/api/dashboard`;
-};
-
-export const dashboardApiDashboardGet = async (
-  options?: RequestInit
-): Promise<dashboardApiDashboardGetResponse> => {
-  const res = await fetch(getDashboardApiDashboardGetUrl(), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data: dashboardApiDashboardGetResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
-
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as dashboardApiDashboardGetResponse;
-};
-
-/**
- * @summary User List
- */
-export type userListApiUsersGetResponse200 = {
-  data: unknown[];
-  status: 200;
-};
-
-export type userListApiUsersGetResponse422 = {
-  data: HTTPValidationError;
-  status: 422;
-};
-
-export type userListApiUsersGetResponseComposite =
-  | userListApiUsersGetResponse200
-  | userListApiUsersGetResponse422;
-
-export type userListApiUsersGetResponse =
-  userListApiUsersGetResponseComposite & {
-    headers: Headers;
+  /**
+   * @summary User List
+   */
+  const userListApiUsersGet = (params?: UserListApiUsersGetParams) => {
+    return orvalMutator<UserItem[]>({
+      url: `/api/users`,
+      method: "GET",
+      params,
+    });
   };
 
-export const getUserListApiUsersGetUrl = (
-  params?: UserListApiUsersGetParams
-) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/users?${stringifiedParams}`
-    : `/api/users`;
-};
-
-export const userListApiUsersGet = async (
-  params?: UserListApiUsersGetParams,
-  options?: RequestInit
-): Promise<userListApiUsersGetResponse> => {
-  const res = await fetch(getUserListApiUsersGetUrl(params), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data: userListApiUsersGetResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
-
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as userListApiUsersGetResponse;
-};
-
-/**
- * @summary Handle Http Get
- */
-export type handleHttpGetGraphqlGetResponse200 = {
-  data: unknown;
-  status: 200;
-};
-
-export type handleHttpGetGraphqlGetResponse404 = {
-  data: null;
-  status: 404;
-};
-
-export type handleHttpGetGraphqlGetResponseComposite =
-  | handleHttpGetGraphqlGetResponse200
-  | handleHttpGetGraphqlGetResponse404;
-
-export type handleHttpGetGraphqlGetResponse =
-  handleHttpGetGraphqlGetResponseComposite & {
-    headers: Headers;
+  /**
+   * @summary Login
+   */
+  const loginApiLoginPost = (loginRequest: LoginRequest) => {
+    return orvalMutator<LoginResponse>({
+      url: `/api/login`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: loginRequest,
+    });
   };
 
-export const getHandleHttpGetGraphqlGetUrl = () => {
-  return `/graphql`;
-};
-
-export const handleHttpGetGraphqlGet = async (
-  options?: RequestInit
-): Promise<handleHttpGetGraphqlGetResponse> => {
-  const res = await fetch(getHandleHttpGetGraphqlGetUrl(), {
-    ...options,
-    method: "GET",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data: handleHttpGetGraphqlGetResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
-
-  return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as handleHttpGetGraphqlGetResponse;
-};
-
-/**
- * @summary Handle Http Post
- */
-export type handleHttpPostGraphqlPostResponse200 = {
-  data: unknown;
-  status: 200;
-};
-
-export type handleHttpPostGraphqlPostResponseComposite =
-  handleHttpPostGraphqlPostResponse200;
-
-export type handleHttpPostGraphqlPostResponse =
-  handleHttpPostGraphqlPostResponseComposite & {
-    headers: Headers;
+  /**
+   * @summary Get Me
+   */
+  const getMeApiMeGet = () => {
+    return orvalMutator<MeDto>({ url: `/api/me`, method: "GET" });
   };
 
-export const getHandleHttpPostGraphqlPostUrl = () => {
-  return `/graphql`;
-};
+  /**
+   * @summary Handle Http Get
+   */
+  const handleHttpGetGraphqlGet = () => {
+    return orvalMutator<unknown>({ url: `/graphql`, method: "GET" });
+  };
 
-export const handleHttpPostGraphqlPost = async (
-  options?: RequestInit
-): Promise<handleHttpPostGraphqlPostResponse> => {
-  const res = await fetch(getHandleHttpPostGraphqlPostUrl(), {
-    ...options,
-    method: "POST",
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data: handleHttpPostGraphqlPostResponse["data"] = body
-    ? JSON.parse(body)
-    : {};
+  /**
+   * @summary Handle Http Post
+   */
+  const handleHttpPostGraphqlPost = () => {
+    return orvalMutator<unknown>({ url: `/graphql`, method: "POST" });
+  };
 
   return {
-    data,
-    status: res.status,
-    headers: res.headers,
-  } as handleHttpPostGraphqlPostResponse;
+    detailImageApiDetailGet,
+    readRandomApiListGet,
+    analyzeImageApiAnalyzePost,
+    findSimilarIdApiSimilarToIdGet,
+    findSimilarImageApiSimilarToImagePost,
+    dashboardApiDashboardGet,
+    userListApiUsersGet,
+    loginApiLoginPost,
+    getMeApiMeGet,
+    handleHttpGetGraphqlGet,
+    handleHttpPostGraphqlPost,
+  };
 };
+export type DetailImageApiDetailGetResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSpyLab>["detailImageApiDetailGet"]>>
+>;
+export type ReadRandomApiListGetResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSpyLab>["readRandomApiListGet"]>>
+>;
+export type AnalyzeImageApiAnalyzePostResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getSpyLab>["analyzeImageApiAnalyzePost"]>
+  >
+>;
+export type FindSimilarIdApiSimilarToIdGetResult = NonNullable<
+  Awaited<
+    ReturnType<ReturnType<typeof getSpyLab>["findSimilarIdApiSimilarToIdGet"]>
+  >
+>;
+export type FindSimilarImageApiSimilarToImagePostResult = NonNullable<
+  Awaited<
+    ReturnType<
+      ReturnType<typeof getSpyLab>["findSimilarImageApiSimilarToImagePost"]
+    >
+  >
+>;
+export type DashboardApiDashboardGetResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSpyLab>["dashboardApiDashboardGet"]>>
+>;
+export type UserListApiUsersGetResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSpyLab>["userListApiUsersGet"]>>
+>;
+export type LoginApiLoginPostResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSpyLab>["loginApiLoginPost"]>>
+>;
+export type GetMeApiMeGetResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSpyLab>["getMeApiMeGet"]>>
+>;
+export type HandleHttpGetGraphqlGetResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSpyLab>["handleHttpGetGraphqlGet"]>>
+>;
+export type HandleHttpPostGraphqlPostResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSpyLab>["handleHttpPostGraphqlPost"]>>
+>;

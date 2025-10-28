@@ -62,19 +62,10 @@ function App() {
                                     options={{
                                         syncWithLocation: true,
                                         warnWhenUnsavedChanges: true,
-                                        useNewQueryKeys: true,
                                         projectId: "H3b24T-fOBw9I-1q9FqW", title: {
                                             icon: null,
                                             text: "SpyLab",
                                         },
-                                        /*errorNotification: (error, values, resource) => {
-                                            const message = error?.response?.data?.message ?? error?.message ?? "Unknown error";
-                                            return {
-                                                message,
-                                                description: `Resource: ${resource?.name ?? "unknown"}`,
-                                                type: "error" as const,
-                                            };
-                                        },*/
                                     }}
                                 >
                                     <Routes>

@@ -8,7 +8,7 @@ import { Modal, Table, Tooltip } from "antd";
 import { FaceBox, FacePicker } from "../../components/FacePicker";
 import { useEffect, useState } from "react";
 import { FaceSearchPanel } from "../../components/FaceSearchPanel";
-import { FaceSimilarItemResponse, getFindSimilarImageApiSimilarToImagePostUrl } from "../../api/generated";
+import { FaceSimilarItemResponse } from "../../api/generated";
 
 export const FaceFinderList = () => {
 
@@ -36,7 +36,7 @@ export const FaceFinderList = () => {
         const call = async () => {
             if (selectedBox && selectedImage) {
                 const m = await mutation.mutateAsync({
-                    url: getFindSimilarImageApiSimilarToImagePostUrl(),
+                    url: "/api/similar-to-image",
                     method: "post",
                     config: {
                         headers: { "Content-Type": "multipart/form-data" }

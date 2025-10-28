@@ -1,5 +1,5 @@
 from wireup import Injected
-from typing import Any, List
+from typing import Any, List, Literal
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel
 from app import face_service
@@ -184,7 +184,7 @@ async def user_list(
     user_repo: Injected[UserRepository],
     _start: int = 0,
     _end: int = 20
-) -> List[Any]:
+) -> List[UserItem]:
 
     data = await user_repo.find_all(_start, _end)
     res = [
@@ -203,12 +203,17 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class LoginResponse(BaseModel):
+    token: str
+    token_type: Literal["bearer"]
+
+
 @router.post("/login")
 async def login(
     request: LoginRequest,
     user_repo: Injected[UserRepository],
     auth: Injected[AuthService],
-):
+) -> LoginResponse:
 
     user = await user_repo.find_by_email(request.email)
     if not user:
@@ -216,7 +221,7 @@ async def login(
             status_code=401, detail="Invalid email or password")
 
     token = auth.create_access_token(user)
-    return {"token": token, "token_type": "bearer"}
+    return LoginResponse(token=token, token_type="bearer")
 
 
 class MeDto(BaseModel):
