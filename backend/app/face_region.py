@@ -23,6 +23,7 @@ class FaceRegion(Base):
     left_eye: Mapped[dict[str, int] | list[int] | None] = mapped_column(JSON)
     right_eye: Mapped[dict[str, int] | list[int] | None] = mapped_column(JSON)
     face_confidence: Mapped[float] = mapped_column(Float)
+    face_quality: Mapped[float] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -40,6 +41,7 @@ class FaceRegion(Base):
         left_eye: dict[str, int] | list[int] | None,
         right_eye: dict[str, int] | list[int] | None,
         face_confidence: float,
+        face_quality: float,
         model: str,
         vector: Union[Dict[str, float], np.ndarray],
     ) -> None:
@@ -51,6 +53,7 @@ class FaceRegion(Base):
         self.left_eye = left_eye
         self.right_eye = right_eye
         self.face_confidence = face_confidence
+        self.face_quality = face_quality
         self.created_at = datetime.now(timezone.utc)
         self.model = model
         self.set_vector_by_type(vector, model)

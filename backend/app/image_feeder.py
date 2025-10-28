@@ -53,9 +53,18 @@ class ImageFeeder:
                     faces_data = self._face_service.represent_face(img_path=IMG_ORIG_DIR / fn)
 
                     for data in faces_data:
+                        quality = 0.0
+                        if (
+                            data["facial_area"]["w"] >= 30
+                            and data["facial_area"]["h"] >= 30
+                            and data["face_confidence"] >= 0.6
+                        ):
+                            quality = 1.0
+
                         face = FaceRegion(
                             filename=fn,
                             face_confidence=data["face_confidence"],
+                            face_quality=quality,
                             x=data["facial_area"]["x"],
                             y=data["facial_area"]["y"],
                             w=data["facial_area"]["w"],

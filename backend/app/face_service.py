@@ -38,6 +38,7 @@ class FaceItem(BaseModel):
 class FaceSimilarItem(FaceItem):
     is_same: bool
     distance: float
+    quality: float
 
 
 class AnalyzeBox(BaseModel):
@@ -197,6 +198,7 @@ class FaceService:
                     fn=face.filename,
                     confidence=round(face.face_confidence * 100),
                     distance=distance,
+                    quality=face.face_quality,
                     model=face.model,
                     preview_path=new_fn,
                     source_filepath=face.filename,

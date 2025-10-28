@@ -4,7 +4,7 @@ import {
     useTable,
 } from "@refinedev/antd";
 import { useCustomMutation } from "@refinedev/core";
-import { Modal, Table, Tooltip } from "antd";
+import { Badge, Modal, Table, Tooltip } from "antd";
 import { FaceBox, FacePicker } from "../../components/FacePicker";
 import { useEffect, useState } from "react";
 import { FaceSearchPanel } from "../../components/FaceSearchPanel";
@@ -99,16 +99,38 @@ export const FaceFinderList = () => {
                 <Table.Column dataIndex="fn" title={"Filename"} />
                 <Table.Column
                     dataIndex="distance"
-                    title={"Distance"}
-                    render={(value) => {
-                        return <Tooltip title={value}>{Math.round(Number(value) * 1000) / 1000}</Tooltip>
-                    }}
+                    align="center"
+                    title={<>Similarity distance</>}
+                    render={(value) => (
+                        <Tooltip title={value}>
+                            <strong>{Math.round(Number(value) * 1000) / 1000}</strong>
+                        </Tooltip>
+                    )}
+                />
+                <Table.Column
+                    dataIndex="quality"
+                    title={"Quality"}
+                    align="center"
+                    render={(value) => (
+                        value > 0
+                            ? <Badge count={Math.round(value)} style={{ backgroundColor: '#52c41a' }} />
+                            : <Badge showZero count={Math.round(value)} />
+                    )}
                 />
                 <Table.Column
                     dataIndex="confidence"
+                    align="center"
                     title={"Is a face"}
                     render={(value) => {
                         return value + "%"
+                    }}
+                />
+                <Table.Column
+                    dataIndex="size"
+                    align="center"
+                    title={"Region size"}
+                    render={(value, row: FaceSimilarItemResponse) => {
+                        return row.w + "×" + row.h
                     }}
                 />
                 <Table.Column
@@ -116,8 +138,7 @@ export const FaceFinderList = () => {
                     title={"Model"}
                     render={(value) => {
                         return value
-                    }
-                    }
+                    }}
                 />
                 <Table.Column
                     dataIndex={"preview_url"}
@@ -131,8 +152,7 @@ export const FaceFinderList = () => {
                                 setShowDetails(row)
                             }}
                         />
-                    }
-                    }
+                    }}
                 />
             </Table>
         </List>
