@@ -1,8 +1,7 @@
 from wireup import service
 from datetime import datetime, timedelta
-from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from jose import jwt
 from pydantic import BaseModel
 from app.app_config import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -51,11 +50,5 @@ class AuthService:
     def decode_access_token(self, token: str) -> TokenPayload:
         if not self._loaded:
             self._load_scheme()
-        try:
-            payload = jwt.decode(token, self.public_key, algorithms=[ALGORITHM])
-            return TokenPayload(**payload)
-        except JWTError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired token",
-            )
+        payload = jwt.decode(token, self.public_key, algorithms=[ALGORITHM])
+        return TokenPayload(**payload)
