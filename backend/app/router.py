@@ -3,7 +3,7 @@ from typing import List, Literal
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel
 from app import face_service
-from app.auth_service import AuthService, oauth2_scheme
+from app.auth_service import AuthService, TokenPayload, fastapi_require_access_token, oauth2_scheme
 from app.dashboard_service import DashboardService, DashStats
 from app.face_service import AnalyzeBox, FaceItem, FaceSimilarItem, NoFaceFound
 from fastapi import Request
@@ -39,6 +39,7 @@ async def detail_image(
     request: Request,
     id: int,
     face_service: Injected[face_service.FaceService],
+    jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> DetailData:
     data = await face_service.get_by_id(id)
 
@@ -68,6 +69,7 @@ async def read_random(
     face_service: Injected[FaceService],
     search: str = "",
     limit: int = 20,
+    jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> List[FaceItemResponse]:
     res = await face_service.find_list(limit, search)
     return [
@@ -109,6 +111,7 @@ async def analyze_image(
     request: Request,
     face_service: Injected[FaceService],
     file: UploadFile = File(...),
+    jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> UploadImageResponse:
     try:
         data = await face_service.analyze_image(file)
@@ -130,6 +133,7 @@ async def find_similar_id(
     id: int,
     model: str,
     metric: str = "cosine",
+    jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> List[FaceSimilarItemResponse]:
     res = await face_service.find_similar_by_face_id(id=id, model=model, metric=metric, limit=50)
 
@@ -152,6 +156,7 @@ async def find_similar_image(
     y: int = Form(...),
     w: int = Form(...),
     h: int = Form(...),
+    jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> List[FaceSimilarItemResponse]:
     res = await face_service.find_similar_by_image(file=image, x=x, y=y, w=w, h=h, limit=100)
 
@@ -168,6 +173,7 @@ async def find_similar_image(
 @router.get("/dashboard")
 async def dashboard(
     dashboard_service: Injected[DashboardService],
+    jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> DashStats:
     data = await dashboard_service.get_stats()
     return data
@@ -185,6 +191,7 @@ async def user_list(
     user_repo: Injected[UserRepository],
     _start: int = 0,
     _end: int = 20,
+    jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> List[UserItem]:
     data = await user_repo.find_all(_start, _end)
     res = [UserItem(id=u.id, email=u.email) for u in data]
@@ -227,10 +234,8 @@ class MeDto(BaseModel):
 @router.get("/me")
 async def get_me(
     user_repo: Injected[UserRepository],
-    auth: Injected[AuthService],
-    token: str = Depends(oauth2_scheme),
+    jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> MeDto:
-    jwt = auth.decode_access_token(token)
     user = await user_repo.get_by_id(jwt.sub)
     return MeDto(
         id=user.id,
