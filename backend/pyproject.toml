@@ -110,3 +110,8 @@ dependencies = [
     "wireup==2.0.1",
     "wrapt==1.17.3",
 ]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
