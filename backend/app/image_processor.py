@@ -1,6 +1,7 @@
 from PIL import Image
 import os
 
+
 def crop_and_save(image_path: str, x: int, y: int, w: int, h: int, output_path: str, overwrite: bool) -> str:
     if not overwrite and os.path.exists(output_path):
         return output_path

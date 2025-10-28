@@ -1,5 +1,13 @@
 import wireup
-from app import auth_service, dashboard_service, db, face_repository, face_service, image_feeder, user_repository
+from app import (
+    auth_service,
+    dashboard_service,
+    db,
+    face_repository,
+    face_service,
+    image_feeder,
+    user_repository,
+)
 
 container = wireup.create_async_container(
     parameters={},
@@ -11,5 +19,5 @@ container = wireup.create_async_container(
         image_feeder,
         auth_service,
         db,
-    ]
+    ],
 )

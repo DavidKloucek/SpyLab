@@ -1,5 +1,5 @@
 from wireup import Injected
-from typing import Any, List, Literal
+from typing import List, Literal
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel
 from app import face_service
@@ -40,21 +40,22 @@ async def detail_image(
     id: int,
     face_service: Injected[face_service.FaceService],
 ) -> DetailData:
-
     data = await face_service.get_by_id(id)
 
     data_resp = FaceItemResponse(
         **data.model_dump(),
         preview_url=f"{str(request.base_url)}preview/{data.preview_path}",
-        source_url=f"{str(request.base_url)}source_img/{data.source_filepath}")
+        source_url=f"{str(request.base_url)}source_img/{data.source_filepath}",
+    )
 
     faces_resp = [
         FaceItemResponse(
             **item.model_dump(),
             preview_url=f"{str(request.base_url)}preview/{item.preview_path}",
-            source_url=f"{str(request.base_url)}source_img/{item.source_filepath}"
+            source_url=f"{str(request.base_url)}source_img/{item.source_filepath}",
         )
-        for item in await face_service.get_photo_faces_by_filename(data.fn) if item.model == data.model
+        for item in await face_service.get_photo_faces_by_filename(data.fn)
+        if item.model == data.model
     ]
 
     return DetailData(data=data_resp, faces=faces_resp)
@@ -65,16 +66,16 @@ async def read_random(
     request: Request,
     response: Response,
     face_service: Injected[FaceService],
-    search: str = '',
+    search: str = "",
     limit: int = 20,
 ) -> List[FaceItemResponse]:
-
     res = await face_service.find_list(limit, search)
     return [
         FaceItemResponse(
             **item.model_dump(),
             preview_url=f"{str(request.base_url)}preview/{item.preview_path}",
-            source_url=f"{str(request.base_url)}source_img/{item.source_filepath}")
+            source_url=f"{str(request.base_url)}source_img/{item.source_filepath}",
+        )
         for item in res
     ]
 
@@ -109,18 +110,17 @@ async def analyze_image(
     face_service: Injected[FaceService],
     file: UploadFile = File(...),
 ) -> UploadImageResponse:
-
     try:
         data = await face_service.analyze_image(file)
 
         return UploadImageResponse(
             boxes=data,
             preview_url=f"{str(request.base_url)}preview/",
-            source_url=f"{str(request.base_url)}source_img/")
-    except NoFaceFound as e:
+            source_url=f"{str(request.base_url)}source_img/",
+        )
+    except NoFaceFound:
         # todo
-        raise HTTPException(
-            status_code=500, detail="No face detected in the image")
+        raise HTTPException(status_code=500, detail="No face detected in the image")
 
 
 @router.get("/similar-to-id")
@@ -129,16 +129,16 @@ async def find_similar_id(
     face_service: Injected[FaceService],
     id: int,
     model: str,
-    metric: str = 'cosine',
+    metric: str = "cosine",
 ) -> List[FaceSimilarItemResponse]:
-
     res = await face_service.find_similar_by_face_id(id=id, model=model, metric=metric, limit=50)
 
     return [
         FaceSimilarItemResponse(
             **item.model_dump(),
             preview_url=f"{str(request.base_url)}preview/{item.preview_path}",
-            source_url=f"{str(request.base_url)}source_img/{item.source_filepath}")
+            source_url=f"{str(request.base_url)}source_img/{item.source_filepath}",
+        )
         for item in res
     ]
 
@@ -159,7 +159,8 @@ async def find_similar_image(
         FaceSimilarItemResponse(
             **item.model_dump(),
             preview_url=f"{str(request.base_url)}preview/{item.preview_path}",
-            source_url=f"{str(request.base_url)}source_img/{item.source_filepath}")
+            source_url=f"{str(request.base_url)}source_img/{item.source_filepath}",
+        )
         for item in res
     ]
 
@@ -183,14 +184,10 @@ async def user_list(
     response: Response,
     user_repo: Injected[UserRepository],
     _start: int = 0,
-    _end: int = 20
+    _end: int = 20,
 ) -> List[UserItem]:
-
     data = await user_repo.find_all(_start, _end)
-    res = [
-        UserItem(id=u.id, email=u.email)
-        for u in data
-    ]
+    res = [UserItem(id=u.id, email=u.email) for u in data]
 
     total_count = len(res)
     response.headers["X-Total-Count"] = str(total_count)
@@ -214,11 +211,9 @@ async def login(
     user_repo: Injected[UserRepository],
     auth: Injected[AuthService],
 ) -> LoginResponse:
-
     user = await user_repo.find_by_email(request.email)
     if not user:
-        raise HTTPException(
-            status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
     token = auth.create_access_token(user)
     return LoginResponse(token=token, token_type="bearer")
@@ -233,7 +228,7 @@ class MeDto(BaseModel):
 async def get_me(
     user_repo: Injected[UserRepository],
     auth: Injected[AuthService],
-    token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme),
 ) -> MeDto:
     jwt = auth.decode_access_token(token)
     user = await user_repo.get_by_id(jwt.sub)

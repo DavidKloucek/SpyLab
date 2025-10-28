@@ -4,7 +4,12 @@ from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel
-from app.app_config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, PRIVATE_KEY_PATH, PUBLIC_KEY_PATH
+from app.app_config import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    ALGORITHM,
+    PRIVATE_KEY_PATH,
+    PUBLIC_KEY_PATH,
+)
 from app.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
@@ -24,7 +29,6 @@ class AuthService:
         self.public_key = None
 
     def _load_scheme(self):
-
         with open(PRIVATE_KEY_PATH, "r") as f:
             self.private_key = f.read()
 
@@ -48,8 +52,7 @@ class AuthService:
         if not self._loaded:
             self._load_scheme()
         try:
-            payload = jwt.decode(token, self.public_key,
-                                 algorithms=[ALGORITHM])
+            payload = jwt.decode(token, self.public_key, algorithms=[ALGORITHM])
             return TokenPayload(**payload)
         except JWTError:
             raise HTTPException(

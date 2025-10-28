@@ -9,5 +9,6 @@ async def main():
         c = await repo.count_regions()
         print(f"Count: {c}")
 
+
 if __name__ == "__main__":
     asyncio.run(main())

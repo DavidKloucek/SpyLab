@@ -9,16 +9,13 @@ from app.app_config import MODEL_VECTOR_SIZES
 
 
 class FaceRegion(Base):
-    __tablename__ = 'face_region'
+    __tablename__ = "face_region"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     filename: Mapped[str] = mapped_column(String(250), nullable=False)
-    emb_128: Mapped[Optional[np.ndarray]] = mapped_column(
-        Vector(128), nullable=True)
-    emb_512: Mapped[Optional[np.ndarray]] = mapped_column(
-        Vector(512), nullable=True)
-    emb_4096: Mapped[Optional[np.ndarray]] = mapped_column(
-        Vector(4096), nullable=True)
+    emb_128: Mapped[Optional[np.ndarray]] = mapped_column(Vector(128), nullable=True)
+    emb_512: Mapped[Optional[np.ndarray]] = mapped_column(Vector(512), nullable=True)
+    emb_4096: Mapped[Optional[np.ndarray]] = mapped_column(Vector(4096), nullable=True)
     x: Mapped[int] = mapped_column(Integer)
     y: Mapped[int] = mapped_column(Integer)
     w: Mapped[int] = mapped_column(Integer)
@@ -34,17 +31,17 @@ class FaceRegion(Base):
     model: Mapped[str] = mapped_column(String(25), nullable=False)
 
     def __init__(
-            self,
-            filename: str,
-            x: int,
-            y: int,
-            w: int,
-            h: int,
-            left_eye: dict[str, int] | list[int] | None,
-            right_eye: dict[str, int] | list[int] | None,
-            face_confidence: float,
-            model: str,
-            vector: Union[Dict[str, float], np.ndarray]
+        self,
+        filename: str,
+        x: int,
+        y: int,
+        w: int,
+        h: int,
+        left_eye: dict[str, int] | list[int] | None,
+        right_eye: dict[str, int] | list[int] | None,
+        face_confidence: float,
+        model: str,
+        vector: Union[Dict[str, float], np.ndarray],
     ) -> None:
         self.filename = filename
         self.x = x
@@ -59,30 +56,27 @@ class FaceRegion(Base):
         self.set_vector_by_type(vector, model)
 
     def set_vector_by_type(self, vector: Union[Dict[str, float], np.ndarray], model: str) -> None:
-
         if isinstance(vector, dict):
             vector = np.array(list(vector.values()), dtype=np.float32)
         if isinstance(vector, list):
             vector = np.array(vector, dtype=np.float32)
         if not isinstance(vector, np.ndarray):
-            raise TypeError(
-                f"Expected np.ndarray, got {type(vector)}")
+            raise TypeError(f"Expected np.ndarray, got {type(vector)}")
 
         expected_size = MODEL_VECTOR_SIZES.get(model)
 
         if expected_size and vector.shape[0] != expected_size:
-            raise ValueError(
-                f"Expected vector of size {expected_size} for model '{model}', got {vector.shape[0]}")
+            raise ValueError(f"Expected vector of size {expected_size} for model '{model}', got {vector.shape[0]}")
 
         self.emb_512 = None
         self.emb_128 = None
         self.emb_4096 = None
 
-        if model == 'VGG-Face':
+        if model == "VGG-Face":
             self.emb_4096 = vector
-        elif model == 'Facenet':
+        elif model == "Facenet":
             self.emb_128 = vector
-        elif model in ('ArcFace', 'Facenet512'):
+        elif model in ("ArcFace", "Facenet512"):
             self.emb_512 = vector
         else:
             raise ValueError(f"Model '{model}' not implemented yet")
@@ -92,12 +86,13 @@ class FaceRegion(Base):
             if not isinstance(v, np.ndarray):
                 raise TypeError
             return v
+
         model = self.model
-        if model == 'VGG-Face':
+        if model == "VGG-Face":
             return type_ok(self.emb_4096)
-        elif model == 'Facenet':
+        elif model == "Facenet":
             return type_ok(self.emb_128)
-        elif model == 'ArcFace' or model == 'Facenet512':
+        elif model == "ArcFace" or model == "Facenet512":
             return type_ok(self.emb_512)
         else:
             raise Exception(f"Model '{model}' not implemented yet")

@@ -1,21 +1,19 @@
 from enum import Enum
 from typing import List
-import cv2 as cv
 import cv2
 import numpy as np
+
 # import mediapipe as mp
 from deepface import DeepFace  # type: ignore
-import mediapipe as mp # type: ignore
+import mediapipe as mp  # type: ignore
 import math
 
 MODEL_DEFAULT = "ArcFace"
 DETECTOR_BACKEND = "mtcnn"
 
-img_path = 'static/img/babishokej.jpeg'
+img_path = "static/img/babishokej.jpeg"
 
-faces_data = DeepFace.represent(img_path=img_path,
-                                model_name=MODEL_DEFAULT,
-                                detector_backend=DETECTOR_BACKEND)
+faces_data = DeepFace.represent(img_path=img_path, model_name=MODEL_DEFAULT, detector_backend=DETECTOR_BACKEND)
 
 orig = cv2.imread(img_path)
 
@@ -99,16 +97,20 @@ class ViewMode(Enum):
     BLUR = 5
 
 
-modes: List[ViewMode] = [ViewMode.ID, ViewMode.CONFIDENCE,
-                         ViewMode.BRIGHTNESS, ViewMode.CONTRAST, ViewMode.BLUR]
+modes: List[ViewMode] = [
+    ViewMode.ID,
+    ViewMode.CONFIDENCE,
+    ViewMode.BRIGHTNESS,
+    ViewMode.CONTRAST,
+    ViewMode.BLUR,
+]
 mode_index = 0
 mode = modes[mode_index]
 
 first_iter = True
 
 while True:
-
-    key = cv2.waitKey(500*1)
+    key = cv2.waitKey(500 * 1)
     print(f"Key pressed: {key}")
 
     if key == 27:
@@ -130,24 +132,30 @@ while True:
 
     img = orig.copy()
 
-    cv2.putText(img, f"Mode: {mode.name}", (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+    cv2.putText(
+        img,
+        f"Mode: {mode.name}",
+        (10, 30),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1,
+        (0, 255, 255),
+        2,
+    )
 
     for data in faces_data:
-
         x = data["facial_area"]["x"]
         y = data["facial_area"]["y"]
         w = data["facial_area"]["w"]
         h = data["facial_area"]["h"]
 
-        conf_p = float(data['face_confidence']) * 100
+        conf_p = float(data["face_confidence"]) * 100
 
-        face_crop = img[y:y+h, x:x+w]
+        face_crop = img[y : y + h, x : x + w]
 
         brightness, contrast = compute_brightness_contrast_score(face_crop)
         blur = compute_blur_score(face_crop)
 
-        img = cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), thickness=2)
+        img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), thickness=2)
         # img = cv2.putText(img, f"{id}", (int(x+(w/2)-len(str(id))), y-20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
         s = f"{id}"
@@ -163,13 +171,22 @@ while True:
         # s = f"{round(conf_p)}%, {round(blur)}, {round(brightness)}, {round(contrast)}"
         ff = is_facing_forward(face_crop)
         print(f"ff {id} / {len(faces_data)}")
-        img = cv2.putText(img, f"{s}; {ff}", (int(x+(w/2)-len(str(s))), y-20),
-                          cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        img = cv2.putText(
+            img,
+            f"{s}; {ff}",
+            (int(x + (w / 2) - len(str(s))), y - 20),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            (0, 255, 0),
+            2,
+        )
 
         # s = f"c: {round(conf_p)} bl: {round(blur)} br: {round(brightness)} ct: {round(contrast)}"
         # img = cv2.putText(img, s, (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-        print(f"#{id} | conf: {round(conf_p)}% | blur: {round(blur)} | brightness: {round(brightness)} | contrast: {round(contrast)} | {x}, {y}, {w}, {h}")
+        print(
+            f"#{id} | conf: {round(conf_p)}% | blur: {round(blur)} | brightness: {round(brightness)} | contrast: {round(contrast)} | {x}, {y}, {w}, {h}"
+        )
 
         id += 1
 

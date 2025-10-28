@@ -26,21 +26,16 @@ MODEL_DEFAULT = "ArcFace"
 METRIC_DEFAULT = "cosine"
 DETECTOR_BACKEND = "mtcnn"
 
-MODEL_THRESHOLDS = {
-    'Facenet': 0.8,
-    'Facenet512': 0.5,
-    'VGG-Face': 0.6,
-    'ArcFace': 0.6
-}
+MODEL_THRESHOLDS = {"Facenet": 0.8, "Facenet512": 0.5, "VGG-Face": 0.6, "ArcFace": 0.6}
 MODEL_VECTOR_SIZES = {
     "VGG-Face": 4096,
     "Facenet": 128,
     "ArcFace": 512,
-    "Facenet512": 512
+    "Facenet512": 512,
 }
 ALLOWED_ORIGINS = [
     "http://localhost:4200",
     "http://localhost:9000",
     "http://localhost:3000",
-    "http://localhost:5173"
+    "http://localhost:5173",
 ]

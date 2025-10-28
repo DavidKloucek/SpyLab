@@ -3,7 +3,6 @@ from typing import Optional, List, Tuple, Sequence
 import re
 import numpy as np
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import func
 from sqlalchemy.future import select
 from pgvector.sqlalchemy import VECTOR  # type: ignore
 from sqlalchemy import func, or_, cast
@@ -14,34 +13,24 @@ from wireup import service
 
 @service(lifetime="scoped")
 class FaceRepository:
-
     def __init__(self, session: AsyncSession):
         self._session = session
 
     async def find_faces_by_image_name(self, fn: str) -> Sequence[FaceRegion]:
-        return (await self._session.execute(
-            select(FaceRegion)
-            .where(FaceRegion.filename.ilike(fn))
-        )).scalars().all()
+        return (await self._session.execute(select(FaceRegion).where(FaceRegion.filename.ilike(fn)))).scalars().all()
 
     async def find_random(self, limit: int, search: str) -> Sequence[FaceRegion]:
         or_list = []
-        for term in re.split(r'\s+', search):
+        for term in re.split(r"\s+", search):
             or_list.append(FaceRegion.filename.ilike(f"%{term}%"))
             or_list.append(FaceRegion.model.ilike(f"%{term}%"))
 
-        q = (select(FaceRegion)
-             .filter(or_(*or_list))
-             .order_by(func.random())
-             .limit(limit))
+        q = select(FaceRegion).filter(or_(*or_list)).order_by(func.random()).limit(limit)
         result = await self._session.execute(q)
         return result.scalars().all()
 
     async def find_all_filenames(self) -> List[str]:
-        result = await self._session.execute(
-            select(FaceRegion.filename)
-            .group_by(FaceRegion.filename)
-        )
+        result = await self._session.execute(select(FaceRegion.filename).group_by(FaceRegion.filename))
         return [str(filename) for filename in result.scalars().all()]
 
     async def count_regions(self, since: datetime.datetime | None = None) -> int:
@@ -54,10 +43,7 @@ class FaceRepository:
         return result.scalar_one()
 
     async def find_face_by_id(self, id: int) -> Optional[FaceRegion]:
-        q = (
-            select(FaceRegion)
-            .filter(FaceRegion.id == id)
-        )
+        q = select(FaceRegion).filter(FaceRegion.id == id)
         result = await self._session.execute(q)
         return result.scalars().first()
 
@@ -68,13 +54,12 @@ class FaceRepository:
         raise FaceRepositoryException()
 
     async def find_similar_faces(
-            self,
-            target_vector: np.ndarray,
-            model: ModelType,
-            metric: MetricType,
-            limit: int = 10,
+        self,
+        target_vector: np.ndarray,
+        model: ModelType,
+        metric: MetricType,
+        limit: int = 10,
     ) -> List[Tuple[FaceRegion, float]]:
-
         if model == "VGG-Face":
             vector_column = FaceRegion.emb_4096
         elif model == "Facenet":
@@ -99,8 +84,7 @@ class FaceRepository:
         query = (
             select(
                 FaceRegion,
-                distance_func(vector_column, target_vector_db).label(
-                    "distance")
+                distance_func(vector_column, target_vector_db).label("distance"),
             )
             .filter(FaceRegion.model == model)
             .order_by("distance")

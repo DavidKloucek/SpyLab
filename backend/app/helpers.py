@@ -1,8 +1,8 @@
 import numpy as np
-from typing import TypeVar, List, Union, cast, Literal, Self
+from typing import TypeVar, List, cast, Literal
 from enum import Enum
 
-Vector = TypeVar('Vector', bound=List[float])
+Vector = TypeVar("Vector", bound=List[float])
 
 
 class ModelType2(Enum):
@@ -49,8 +49,4 @@ class Embedding:
 
 
 def distance(a: Embedding, b: Embedding) -> float:
-    return float(np.linalg.norm(
-        normalize(np.array(a.embedding_json))
-        -
-        normalize(np.array(b.embedding_json))
-    ))
+    return float(np.linalg.norm(normalize(np.array(a.embedding_json)) - normalize(np.array(b.embedding_json))))

@@ -6,22 +6,24 @@ from fastapi.middleware.cors import CORSMiddleware
 import wireup.integration
 import wireup.integration.fastapi
 from app.container import container
-from app.app_config import ALLOWED_ORIGINS, APP_TITLE, GQL_PATH, IMG_TEMP_DIR_URL_PATH, IMG_ORIG_DIR_URL_PATH, IMG_TEMP_DIR, IMG_ORIG_DIR
+from app.app_config import (
+    ALLOWED_ORIGINS,
+    APP_TITLE,
+    GQL_PATH,
+    IMG_TEMP_DIR_URL_PATH,
+    IMG_ORIG_DIR_URL_PATH,
+    IMG_TEMP_DIR,
+    IMG_ORIG_DIR,
+)
 from app.router import router
-from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
 from app.gql_schema import get_context, schema
-from app.container import container
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(
-        title=APP_TITLE
-    )
-    app.mount(IMG_TEMP_DIR_URL_PATH, StaticFiles(
-        directory=IMG_TEMP_DIR), name="preview")
-    app.mount(IMG_ORIG_DIR_URL_PATH, StaticFiles(
-        directory=IMG_ORIG_DIR), name="original")
+    app = FastAPI(title=APP_TITLE)
+    app.mount(IMG_TEMP_DIR_URL_PATH, StaticFiles(directory=IMG_TEMP_DIR), name="preview")
+    app.mount(IMG_ORIG_DIR_URL_PATH, StaticFiles(directory=IMG_ORIG_DIR), name="original")
 
     app.add_middleware(
         CORSMiddleware,

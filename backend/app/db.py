@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from app.app_config import DATABASE_URL
 
 engine = create_async_engine(DATABASE_URL, echo=False)
-async_session_factory = async_sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False)
+async_session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = declarative_base()
+
 
 @asynccontextmanager
 @service(lifetime="scoped")

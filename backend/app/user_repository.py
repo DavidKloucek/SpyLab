@@ -12,7 +12,6 @@ class UserNotFoundException(BaseException):
 
 @service(lifetime="scoped")
 class UserRepository:
-
     def __init__(self, session: AsyncSession):
         self._session = session
 
@@ -27,18 +26,12 @@ class UserRepository:
         return list(result.scalars().all())
 
     async def find_by_email(self, email: str) -> Optional[User]:
-        q = (
-            select(User)
-            .filter(User.email == email)
-        )
+        q = select(User).filter(User.email == email)
         result = await self._session.execute(q)
         return result.scalars().first()
 
     async def find_by_id(self, id: int) -> Optional[User]:
-        q = (
-            select(User)
-            .filter(User.id == id)
-        )
+        q = select(User).filter(User.id == id)
         result = await self._session.execute(q)
         return result.scalars().first()
 
@@ -47,4 +40,3 @@ class UserRepository:
         if res is not None:
             return res
         raise UserNotFoundException()
-
