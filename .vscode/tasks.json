@@ -4,12 +4,9 @@
         {
             "label": "Run dev server",
             "type": "shell",
-            "command": "${workspaceFolder}/backend/.venv/bin/python",
-            "windows": {
-                "command": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe"
-            },
+            "command": "uv",
             "args": [
-                "-m",
+                "run",
                 "uvicorn",
                 "app.main:app",
                 "--reload"
@@ -26,8 +23,10 @@
         {
             "label": "Run prod server",
             "type": "shell",
-            "command": "gunicorn",
+            "command": "uv",
             "args": [
+                "run",
+                "gunicorn",
                 "-k",
                 "uvicorn.workers.UvicornWorker",
                 "-w",
@@ -44,22 +43,6 @@
                 "-",
                 "app.main:app"
             ],
-            "windows": {
-                "command": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe",
-                "args": [
-                    "-m",
-                    "uvicorn",
-                    "app.main:app",
-                    "--host",
-                    "0.0.0.0",
-                    "--port",
-                    "8000",
-                    "--workers",
-                    "4",
-                    "--log-level",
-                    "info"
-                ]
-            },
             "options": {
                 "cwd": "${workspaceFolder}/backend"
             },
@@ -72,11 +55,9 @@
         {
             "label": "Run feeder",
             "type": "shell",
-            "command": "${workspaceFolder}/backend/.venv/bin/python",
-            "windows": {
-                "command": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe"
-            },
+            "command": "uv",
             "args": [
+                "run",
                 "-m",
                 "bin.feeder"
             ],
@@ -89,11 +70,9 @@
         {
             "label": "Run dev cli script",
             "type": "shell",
-            "command": "${workspaceFolder}/backend/.venv/bin/python",
-            "windows": {
-                "command": "${workspaceFolder}\\backend\\.venv\\Scripts\\python.exe"
-            },
+            "command": "uv",
             "args": [
+                "run",
                 "-m",
                 "bin.cli"
             ],
@@ -134,7 +113,10 @@
         {
             "label": "orval: generate",
             "type": "shell",
-            "command": "pnpm orval",
+            "command": "pnpm",
+            "args": [
+                "orval"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}/ui-react"
             },
@@ -144,7 +126,11 @@
         {
             "label": "orval: watch",
             "type": "shell",
-            "command": "pnpm orval --watch",
+            "command": "pnpm",
+            "args": [
+                "orval",
+                "--watch"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}/ui-react"
             },
