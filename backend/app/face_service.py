@@ -1,18 +1,16 @@
-from wireup import service
+from wireup import Inject, service
 import hashlib
 import tempfile
-from typing import List
+from typing import Annotated, List
 from fastapi import UploadFile
 from pydantic import BaseModel
 from pydantic.types import PositiveInt
 from app.face_region import FaceRegion
 from app.app_config import (
-    DETECTOR_BACKEND,
     IMG_ORIG_DIR,
     IMG_TEMP_DIR,
     METRIC_DEFAULT,
     MODEL_DEFAULT,
-    MODEL_THRESHOLDS,
 )
 from app.image_processor import crop_and_save
 from app.face_repository import FaceRepository
@@ -55,17 +53,22 @@ class NoFaceFound(Exception):
 
 @service(lifetime="scoped")
 class FaceService:
-    _face_repository: FaceRepository
-
-    def __init__(self, face_repository: FaceRepository):
+    def __init__(
+        self,
+        face_repository: FaceRepository,
+        model_thresholds: Annotated[dict[str, float], Inject(param="model_thresholds")],
+        detector_backend: Annotated[str, Inject(param="detector_backend")],
+    ):
         self._face_repository = face_repository
+        self._model_thresholds = model_thresholds
+        self._detector_backend = detector_backend
 
     def represent_face(self, img_path):
         try:
             return DeepFace.represent(
                 img_path=img_path,
                 model_name=MODEL_DEFAULT,
-                detector_backend=DETECTOR_BACKEND,
+                detector_backend=self._detector_backend,
             )
         except ValueError as e:
             if e.args and str(e.args[0]).startswith("Face could not be detected"):
@@ -131,7 +134,7 @@ class FaceService:
                 metric=str_to_metric_type(METRIC_DEFAULT),
                 limit=100,
             )
-            similar_faces = [item for item in similar_faces if item.distance <= MODEL_THRESHOLDS[MODEL_DEFAULT]]
+            similar_faces = [item for item in similar_faces if item.distance <= self._model_thresholds[MODEL_DEFAULT]]
 
             output.append(
                 AnalyzeBox(
@@ -207,7 +210,7 @@ class FaceService:
                     model=face.model,
                     preview_path=new_fn,
                     source_filepath=face.filename,
-                    is_same=MODEL_THRESHOLDS[face.model] >= distance,
+                    is_same=self._model_thresholds[face.model] >= distance,
                     x=face.x,
                     y=face.y,
                     w=face.w,
