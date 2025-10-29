@@ -1,5 +1,6 @@
 from wireup import service
 import hashlib
+import tempfile
 from typing import List
 from PIL import Image
 from fastapi import UploadFile
@@ -115,11 +116,15 @@ class FaceService:
         output: List[AnalyzeBox] = []
 
         contents = await file.read()
-
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
-        img_array = np.array(image)
-
-        faces_data = self.represent_face(img_path=img_array)
+        # image = Image.open(io.BytesIO(contents), formats=None).convert("RGB")
+        # img_array = np.array(image)
+        # faces_data = self.represent_face(img_path=img_array)
+        # TODO
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=True) as tmp:
+            tmp.write(contents)
+            tmp_path = tmp.name
+            print(tempfile.tempdir)
+            faces_data = self.represent_face(img_path=tmp_path)
 
         for data in faces_data:
             emb = data["embedding"]
@@ -148,12 +153,15 @@ class FaceService:
         self, file: UploadFile, x: int, y: int, w: int, h: int, limit: int
     ) -> List[FaceSimilarItem]:
         contents = await file.read()
-
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
-        img_array = np.array(image)
-        # cropped_array = img_array[y:y+h, x:x+w, :]
-
-        faces_data = self.represent_face(img_path=img_array)
+        # image = Image.open(io.BytesIO(contents)).convert("RGB")
+        # img_array = np.array(image)
+        ## cropped_array = img_array[y:y+h, x:x+w, :]
+        # faces_data = self.represent_face(img_path=img_array)
+        # TODO
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=True) as tmp:
+            tmp.write(contents)
+            tmp_path = tmp.name
+            faces_data = self.represent_face(img_path=tmp_path)
 
         vector = None
         for data in faces_data:
