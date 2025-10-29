@@ -13,7 +13,6 @@ from app.user_repository import UserRepository
 """
 todo: verify password
 todo: refresh tokens
-todo: protect routes
 """
 
 router = APIRouter()
@@ -34,7 +33,7 @@ class DetailData(BaseModel):
     faces: List[FaceItemResponse]
 
 
-@router.get("/detail")
+@router.get("/detail", response_model=DetailData)
 async def detail_image(
     request: Request,
     id: int,
@@ -62,7 +61,7 @@ async def detail_image(
     return DetailData(data=data_resp, faces=faces_resp)
 
 
-@router.get("/list")
+@router.get("/list", response_model=List[FaceItemResponse])
 async def read_random(
     request: Request,
     response: Response,
@@ -106,7 +105,7 @@ class UploadImageResponse(BaseModel):
     boxes: List[AnalyzeBox]
 
 
-@router.post("/analyze")
+@router.post("/analyze", response_model=UploadImageResponse)
 async def analyze_image(
     request: Request,
     face_service: Injected[FaceService],
@@ -126,7 +125,7 @@ async def analyze_image(
         raise HTTPException(status_code=500, detail="No face detected in the image")
 
 
-@router.get("/similar-to-id")
+@router.get("/similar-to-id", response_model=List[FaceSimilarItemResponse])
 async def find_similar_id(
     request: Request,
     face_service: Injected[FaceService],
@@ -147,7 +146,7 @@ async def find_similar_id(
     ]
 
 
-@router.post("/similar-to-image")
+@router.post("/similar-to-image", response_model=List[FaceSimilarItemResponse])
 async def find_similar_image(
     request: Request,
     image: UploadFile,
@@ -170,7 +169,7 @@ async def find_similar_image(
     ]
 
 
-@router.get("/dashboard")
+@router.get("/dashboard", response_model=DashStats)
 async def dashboard(
     dashboard_service: Injected[DashboardService],
     jwt: TokenPayload = Depends(fastapi_require_access_token),
@@ -184,7 +183,7 @@ class UserItem(BaseModel):
     email: str
 
 
-@router.get("/users")
+@router.get("/users", response_model=List[UserItem])
 async def user_list(
     request: Request,
     response: Response,
@@ -212,7 +211,7 @@ class LoginResponse(BaseModel):
     token_type: Literal["bearer"]
 
 
-@router.post("/login")
+@router.post("/login", response_model=LoginResponse)
 async def login(
     request: LoginRequest,
     user_repo: Injected[UserRepository],
@@ -231,7 +230,7 @@ class MeDto(BaseModel):
     email: str
 
 
-@router.get("/me")
+@router.get("/me", response_model=MeDto)
 async def get_me(
     user_repo: Injected[UserRepository],
     jwt: TokenPayload = Depends(fastapi_require_access_token),
