@@ -123,7 +123,6 @@ class FaceService:
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=True) as tmp:
             tmp.write(contents)
             tmp_path = tmp.name
-            print(tempfile.tempdir)
             faces_data = self.represent_face(img_path=tmp_path)
 
         for data in faces_data:
