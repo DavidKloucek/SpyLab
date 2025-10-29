@@ -3,7 +3,7 @@ from typing import List, Literal
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel
 from app import face_service
-from app.auth_service import AuthService, TokenPayload, fastapi_require_access_token, oauth2_scheme
+from app.auth_service import AuthService, TokenPayload, fastapi_require_access_token
 from app.dashboard_service import DashboardService, DashStats
 from app.face_service import AnalyzeBox, FaceItem, FaceSimilarItem, NoFaceFound
 from fastapi import Request
@@ -11,7 +11,6 @@ from app.face_service import FaceService
 from app.user_repository import UserRepository
 
 """
-todo: verify password
 todo: refresh tokens
 """
 
@@ -215,13 +214,12 @@ class LoginResponse(BaseModel):
 async def login(
     request: LoginRequest,
     user_repo: Injected[UserRepository],
-    auth: Injected[AuthService],
 ) -> LoginResponse:
     user = await user_repo.find_by_email(request.email)
-    if not user:
+    if not user or not AuthService.verify_password(request.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    token = auth.create_access_token(user)
+    token = AuthService.create_access_token(user)
     return LoginResponse(token=token, token_type="bearer")
 
 

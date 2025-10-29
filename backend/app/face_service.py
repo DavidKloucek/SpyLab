@@ -2,7 +2,6 @@ from wireup import service
 import hashlib
 import tempfile
 from typing import List
-from PIL import Image
 from fastapi import UploadFile
 from pydantic import BaseModel
 from pydantic.types import PositiveInt
@@ -20,7 +19,6 @@ from app.face_repository import FaceRepository
 from app.helpers import str_to_metric_type, str_to_model_type
 from deepface import DeepFace  # type: ignore
 import numpy as np
-import io
 
 
 class FaceItem(BaseModel):

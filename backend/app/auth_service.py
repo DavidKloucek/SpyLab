@@ -6,6 +6,7 @@ from jose import JWTError, jwt
 from pydantic import BaseModel
 from app import app_config as cfg
 from app.user import User
+import bcrypt
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -18,6 +19,10 @@ class TokenPayload(BaseModel):
 
 @service(lifetime="scoped")
 class AuthService:
+    @staticmethod
+    def verify_password(plain: str, hash: str) -> bool:
+        return bcrypt.checkpw(plain.encode(), hash.encode())
+
     @staticmethod
     def create_access_token(user: User):
         expire = datetime.utcnow() + timedelta(minutes=cfg.ACCESS_TOKEN_EXPIRE_MINUTES)
