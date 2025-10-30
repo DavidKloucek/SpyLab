@@ -1,7 +1,7 @@
 from wireup import Injected
 from typing import List, Literal
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, NonNegativeInt
 from app import face_service
 from app.auth_service import AuthService, TokenPayload, fastapi_require_access_token
 from app.dashboard_service import DashboardService, DashStats
@@ -81,8 +81,8 @@ async def read_random(
 
 
 class Pagination(BaseModel):
-    total: int
-    pageCount: int
+    total: NonNegativeInt
+    pageCount: NonNegativeInt
 
 
 class Meta(BaseModel):
@@ -179,7 +179,7 @@ async def dashboard(
 
 class UserItem(BaseModel):
     id: int
-    email: str
+    email: EmailStr
 
 
 @router.get("/users", response_model=List[UserItem])
@@ -201,7 +201,7 @@ async def user_list(
 
 
 class LoginRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 
@@ -225,7 +225,7 @@ async def login(
 
 class MeDto(BaseModel):
     id: int
-    email: str
+    email: EmailStr
 
 
 @router.get("/me", response_model=MeDto)

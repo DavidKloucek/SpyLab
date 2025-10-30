@@ -6,14 +6,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 config = Config(RepositoryEnv(os.path.join(BASE_DIR, ".env")))
 
-APP_TITLE = config("APP_TITLE")
-DATABASE_URL = config("DATABASE_URL")
+APP_TITLE = str(config("APP_TITLE"))
+DATABASE_URL = str(config("DATABASE_URL"))
 
-IMG_ORIG_DIR = Path(os.path.abspath(os.path.join(BASE_DIR, config("IMG_ORIG_DIR"))))
-IMG_TEMP_DIR = Path(os.path.abspath(os.path.join(BASE_DIR, config("IMG_TEMP_DIR"))))
+IMG_ORIG_DIR = Path(os.path.abspath(os.path.join(BASE_DIR, str(config("IMG_ORIG_DIR")))))
+IMG_TEMP_DIR = Path(os.path.abspath(os.path.join(BASE_DIR, str(config("IMG_TEMP_DIR")))))
 
-PRIVATE_KEY_PATH = Path(os.path.abspath(os.path.join(BASE_DIR, config("PRIVATE_KEY_PATH"))))
-PUBLIC_KEY_PATH = Path(os.path.abspath(os.path.join(BASE_DIR, config("PUBLIC_KEY_PATH"))))
+PRIVATE_KEY_PATH = Path(os.path.abspath(os.path.join(BASE_DIR, str(config("PRIVATE_KEY_PATH")))))
+PUBLIC_KEY_PATH = Path(os.path.abspath(os.path.join(BASE_DIR, str(config("PUBLIC_KEY_PATH")))))
 
 ACCESS_TOKEN_EXPIRE_MINUTES = int(config("ACCESS_TOKEN_EXPIRE_MINUTES"))
 ALGORITHM = str(config("ALGORITHM"))

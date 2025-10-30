@@ -3,7 +3,7 @@ import hashlib
 import tempfile
 from typing import Annotated, List
 from fastapi import UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
 from pydantic.types import PositiveInt
 from app.face_region import FaceRegion
 from app.app_config import (
@@ -23,28 +23,28 @@ class FaceItem(BaseModel):
     id: PositiveInt
     fn: str
     model: str
-    confidence: float
+    confidence: NonNegativeInt
     preview_path: str
     source_filepath: str
-    x: int
-    y: int
-    w: int
-    h: int
+    x: NonNegativeInt
+    y: NonNegativeInt
+    w: NonNegativeInt
+    h: NonNegativeInt
 
 
 class FaceSimilarItem(FaceItem):
     is_same: bool
-    distance: float
-    quality: float
+    distance: NonNegativeFloat
+    quality: NonNegativeInt
 
 
 class AnalyzeBox(BaseModel):
-    x: int
-    y: int
-    w: int
-    h: int
-    face_confidence: float
-    similar_faces: int
+    x: NonNegativeInt
+    y: NonNegativeInt
+    w: NonNegativeInt
+    h: NonNegativeInt
+    face_confidence: NonNegativeFloat
+    similar_faces: NonNegativeInt
 
 
 class NoFaceFound(Exception):

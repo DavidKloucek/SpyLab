@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from pydantic import BaseModel
+from pydantic import BaseModel, NonNegativeInt
 from app.face_service import FaceRepository
 from wireup import service
 from app.user_repository import UserRepository
@@ -22,6 +22,6 @@ class DashboardService:
 
 
 class DashStats(BaseModel):
-    face_count_total: int
-    face_count_24h: int
-    user_count_total: int
+    face_count_total: NonNegativeInt
+    face_count_24h: NonNegativeInt
+    user_count_total: NonNegativeInt

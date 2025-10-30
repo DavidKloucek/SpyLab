@@ -3,7 +3,7 @@ from wireup import service
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from app import app_config as cfg
 from app.user import User
 import bcrypt
@@ -13,7 +13,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 class TokenPayload(BaseModel):
     sub: int
-    email: str
+    email: EmailStr
     exp: int
 
 
