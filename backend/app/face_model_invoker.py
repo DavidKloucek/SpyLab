@@ -1,6 +1,6 @@
 from deepface import DeepFace  # type: ignore
 from typing import Annotated, List, Tuple
-from pydantic import BaseModel, Field, NonNegativeInt, PositiveFloat
+from pydantic import BaseModel, Field, NonNegativeFloat, NonNegativeInt
 from wireup import Inject, service
 
 
@@ -9,14 +9,14 @@ class FacialArea(BaseModel):
     y: NonNegativeInt
     w: NonNegativeInt
     h: NonNegativeInt
-    left_eye: Tuple[PositiveFloat, PositiveFloat]
-    right_eye: Tuple[PositiveFloat, PositiveFloat]
+    left_eye: Tuple[NonNegativeInt, NonNegativeInt]
+    right_eye: Tuple[NonNegativeInt, NonNegativeInt]
 
 
 class FaceEmbedding(BaseModel):
     embedding: Annotated[List[float], Field(min_length=1)]
     facial_area: FacialArea
-    face_confidence: PositiveFloat
+    face_confidence: NonNegativeFloat
 
 
 class FaceEmbeddingList(BaseModel):
