@@ -1,5 +1,5 @@
 import wireup
-from app import app_config as cfg
+from app import app_config as cfg, face_model_invoker
 from app import (
     auth_service,
     dashboard_service,
@@ -13,6 +13,7 @@ from app import (
 container = wireup.create_async_container(
     parameters={
         "model_thresholds": cfg.MODEL_THRESHOLDS,
+        "model_name": cfg.MODEL_DEFAULT,
         "detector_backend": cfg.DETECTOR_BACKEND,
     },
     service_modules=[
@@ -22,6 +23,7 @@ container = wireup.create_async_container(
         user_repository,
         image_feeder,
         auth_service,
+        face_model_invoker,
         db,
     ],
 )

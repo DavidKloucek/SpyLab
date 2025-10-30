@@ -5,6 +5,7 @@ from typing import Annotated, List
 from fastapi import UploadFile
 from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
 from pydantic.types import PositiveInt
+from app.face_model_invoker import FaceModelInvoker
 from app.face_region import FaceRegion
 from app.app_config import (
     IMG_ORIG_DIR,
@@ -15,7 +16,6 @@ from app.app_config import (
 from app.image_processor import crop_and_save
 from app.face_repository import FaceRepository
 from app.helpers import str_to_metric_type, str_to_model_type
-from deepface import DeepFace  # type: ignore
 import numpy as np
 
 
@@ -35,7 +35,7 @@ class FaceItem(BaseModel):
 class FaceSimilarItem(FaceItem):
     is_same: bool
     distance: NonNegativeFloat
-    quality: NonNegativeInt
+    quality: NonNegativeFloat
 
 
 class AnalyzeBox(BaseModel):
@@ -47,33 +47,17 @@ class AnalyzeBox(BaseModel):
     similar_faces: NonNegativeInt
 
 
-class NoFaceFound(Exception):
-    pass
-
-
 @service(lifetime="scoped")
 class FaceService:
     def __init__(
         self,
         face_repository: FaceRepository,
+        face_engine: FaceModelInvoker,
         model_thresholds: Annotated[dict[str, float], Inject(param="model_thresholds")],
-        detector_backend: Annotated[str, Inject(param="detector_backend")],
     ):
         self._face_repository = face_repository
+        self._face_engine = face_engine
         self._model_thresholds = model_thresholds
-        self._detector_backend = detector_backend
-
-    def represent_face(self, img_path):
-        try:
-            return DeepFace.represent(
-                img_path=img_path,
-                model_name=MODEL_DEFAULT,
-                detector_backend=self._detector_backend,
-            )
-        except ValueError as e:
-            if e.args and str(e.args[0]).startswith("Face could not be detected"):
-                raise NoFaceFound(str(e.args[0]))
-            raise e
 
     def map_face_region_to_item(self, face: FaceRegion) -> FaceItem:
         return FaceItem(
@@ -124,12 +108,12 @@ class FaceService:
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=True) as tmp:
             tmp.write(contents)
             tmp_path = tmp.name
-            faces_data = self.represent_face(img_path=tmp_path)
+            faces_data = self._face_engine.represent_face(img_path=tmp_path)
 
         for data in faces_data:
-            emb = data["embedding"]
+            emb = data.embedding
             similar_faces = await self.find_similar_by_vector(
-                target_vector=emb,
+                target_vector=np.array(emb),
                 model=str_to_model_type(MODEL_DEFAULT),
                 metric=str_to_metric_type(METRIC_DEFAULT),
                 limit=100,
@@ -138,11 +122,11 @@ class FaceService:
 
             output.append(
                 AnalyzeBox(
-                    x=data["facial_area"]["x"],
-                    y=data["facial_area"]["y"],
-                    w=data["facial_area"]["w"],
-                    h=data["facial_area"]["h"],
-                    face_confidence=data["face_confidence"],
+                    x=data.facial_area.x,
+                    y=data.facial_area.y,
+                    w=data.facial_area.w,
+                    h=data.facial_area.h,
+                    face_confidence=data.face_confidence,
                     similar_faces=len(similar_faces),
                 )
             )
@@ -161,20 +145,20 @@ class FaceService:
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=True) as tmp:
             tmp.write(contents)
             tmp_path = tmp.name
-            faces_data = self.represent_face(img_path=tmp_path)
+            faces_data = self._face_engine.represent_face(img_path=tmp_path)
 
         vector = None
         for data in faces_data:
-            area = data["facial_area"]
-            if area["x"] == x and area["y"] == y and area["w"] == w and area["h"] == h:
-                vector = data["embedding"]
+            area = data.facial_area
+            if area.x == x and area.y == y and area.w == w and area.h == h:
+                vector = data.embedding
                 break
 
         if vector is None:
             raise ValueError("Vector not found")
 
         return await self.find_similar_by_vector(
-            target_vector=vector,
+            target_vector=np.array(vector),
             model=MODEL_DEFAULT,
             metric=METRIC_DEFAULT,
             limit=limit,

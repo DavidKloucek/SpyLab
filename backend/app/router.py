@@ -5,7 +5,8 @@ from pydantic import BaseModel, EmailStr, NonNegativeInt
 from app import face_service
 from app.auth_service import AuthService, TokenPayload, fastapi_require_access_token
 from app.dashboard_service import DashboardService, DashStats
-from app.face_service import AnalyzeBox, FaceItem, FaceSimilarItem, NoFaceFound
+from app.face_model_invoker import NoFaceFound
+from app.face_service import AnalyzeBox, FaceItem, FaceSimilarItem
 from fastapi import Request
 from app.face_service import FaceService
 from app.user_repository import UserRepository
