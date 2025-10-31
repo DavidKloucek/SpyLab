@@ -2,7 +2,7 @@ import os
 from typing import Awaitable, Callable
 import numpy as np
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.face_model_invoker import FaceModelInvoker
+from app.face_model_invoker import FaceModelInterface
 from app.face_repository import FaceRepository
 from app.face_service import FaceService
 from app.face_region import FaceRegion
@@ -16,7 +16,7 @@ class ImageFeeder:
         self,
         face_repository: FaceRepository,
         face_service: FaceService,
-        face_engine: FaceModelInvoker,
+        face_engine: FaceModelInterface,
         session: AsyncSession,
     ):
         self._face_repo = face_repository

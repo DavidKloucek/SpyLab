@@ -5,7 +5,7 @@ from typing import Annotated, List
 from fastapi import UploadFile
 from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
 from pydantic.types import PositiveInt
-from app.face_model_invoker import FaceModelInvoker
+from app.face_model_invoker import FaceModelInterface
 from app.face_region import FaceRegion
 from app.app_config import (
     IMG_ORIG_DIR,
@@ -52,7 +52,7 @@ class FaceService:
     def __init__(
         self,
         face_repository: FaceRepository,
-        face_engine: FaceModelInvoker,
+        face_engine: FaceModelInterface,
         model_thresholds: Annotated[dict[str, float], Inject(param="model_thresholds")],
     ):
         self._face_repository = face_repository
