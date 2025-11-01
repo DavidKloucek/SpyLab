@@ -1,9 +1,11 @@
 import wireup
-from app import app_config as cfg, face_model_invoker
+
+from app import app_config as cfg
 from app import (
     auth_service,
     dashboard_service,
     db,
+    face_model_invoker,
     face_repository,
     face_service,
     image_feeder,

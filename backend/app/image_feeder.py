@@ -1,13 +1,15 @@
 import os
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
+
 import numpy as np
 from sqlalchemy.ext.asyncio import AsyncSession
+from wireup import service
+
+from app.app_config import IMG_ORIG_DIR, MODEL_DEFAULT
 from app.face_model_invoker import FaceModelInterface
+from app.face_region import FaceRegion
 from app.face_repository import FaceRepository
 from app.face_service import FaceService
-from app.face_region import FaceRegion
-from app.app_config import IMG_ORIG_DIR, MODEL_DEFAULT
-from wireup import service
 
 
 @service(lifetime="scoped")

@@ -1,14 +1,16 @@
 import datetime
-from typing import Optional, List, Tuple, Sequence
 import re
+from collections.abc import Sequence
+
 import numpy as np
+from pgvector.sqlalchemy import VECTOR  # type: ignore
+from sqlalchemy import cast, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from pgvector.sqlalchemy import VECTOR  # type: ignore
-from sqlalchemy import func, or_, cast
-from app.face_region import FaceRegion
-from app.helpers import ModelType, MetricType
 from wireup import service
+
+from app.face_region import FaceRegion
+from app.helpers import MetricType, ModelType
 
 
 @service(lifetime="scoped")
@@ -29,7 +31,7 @@ class FaceRepository:
         result = await self._session.execute(q)
         return result.scalars().all()
 
-    async def find_all_filenames(self) -> List[str]:
+    async def find_all_filenames(self) -> list[str]:
         result = await self._session.execute(select(FaceRegion.filename).group_by(FaceRegion.filename))
         return [str(filename) for filename in result.scalars().all()]
 
@@ -42,7 +44,7 @@ class FaceRepository:
         result = await self._session.execute(stmt)
         return result.scalar_one()
 
-    async def find_face_by_id(self, id: int) -> Optional[FaceRegion]:
+    async def find_face_by_id(self, id: int) -> FaceRegion | None:
         q = select(FaceRegion).filter(FaceRegion.id == id)
         result = await self._session.execute(q)
         return result.scalars().first()
@@ -59,7 +61,7 @@ class FaceRepository:
         model: ModelType,
         metric: MetricType,
         limit: int = 10,
-    ) -> List[Tuple[FaceRegion, float]]:
+    ) -> list[tuple[FaceRegion, float]]:
         if model == "VGG-Face":
             vector_column = FaceRegion.emb_4096
         elif model == "Facenet":

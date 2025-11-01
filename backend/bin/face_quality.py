@@ -1,12 +1,12 @@
+import math
 from enum import Enum
-from typing import List
+
 import cv2
+import mediapipe as mp  # type: ignore
 import numpy as np
 
 # import mediapipe as mp
 from deepface import DeepFace  # type: ignore
-import mediapipe as mp  # type: ignore
-import math
 
 MODEL_DEFAULT = "ArcFace"
 DETECTOR_BACKEND = "mtcnn"
@@ -97,7 +97,7 @@ class ViewMode(Enum):
     BLUR = 5
 
 
-modes: List[ViewMode] = [
+modes: list[ViewMode] = [
     ViewMode.ID,
     ViewMode.CONFIDENCE,
     ViewMode.BRIGHTNESS,

@@ -1,4 +1,5 @@
 import asyncio
+
 from app.container import container
 from app.face_repository import FaceRepository
 

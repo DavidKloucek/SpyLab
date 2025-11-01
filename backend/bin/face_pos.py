@@ -1,6 +1,7 @@
 import cv2
-import numpy as np
 import mediapipe as mp  # type: ignore
+import numpy as np
+
 # from deepface import DeepFace # type: ignore
 
 mp_face_mesh = mp.solutions.face_mesh

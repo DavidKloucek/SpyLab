@@ -1,11 +1,12 @@
-from datetime import datetime, timezone
-from typing import Optional, Union, Dict
+from datetime import UTC, datetime
+
 import numpy as np
-from sqlalchemy import Integer, String, JSON, Float, DateTime
-from sqlalchemy.orm import Mapped, mapped_column
 from pgvector.sqlalchemy import Vector  # type: ignore
-from app.db import Base
+from sqlalchemy import JSON, DateTime, Float, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+
 from app.app_config import MODEL_VECTOR_SIZES
+from app.db import Base
 
 
 class FaceRegion(Base):
@@ -13,9 +14,9 @@ class FaceRegion(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     filename: Mapped[str] = mapped_column(String(250), nullable=False)
-    emb_128: Mapped[Optional[np.ndarray]] = mapped_column(Vector(128), nullable=True)
-    emb_512: Mapped[Optional[np.ndarray]] = mapped_column(Vector(512), nullable=True)
-    emb_4096: Mapped[Optional[np.ndarray]] = mapped_column(Vector(4096), nullable=True)
+    emb_128: Mapped[np.ndarray | None] = mapped_column(Vector(128), nullable=True)
+    emb_512: Mapped[np.ndarray | None] = mapped_column(Vector(512), nullable=True)
+    emb_4096: Mapped[np.ndarray | None] = mapped_column(Vector(4096), nullable=True)
     x: Mapped[int] = mapped_column(Integer)
     y: Mapped[int] = mapped_column(Integer)
     w: Mapped[int] = mapped_column(Integer)
@@ -26,7 +27,7 @@ class FaceRegion(Base):
     face_quality: Mapped[float] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
     model: Mapped[str] = mapped_column(String(25), nullable=False)
@@ -43,7 +44,7 @@ class FaceRegion(Base):
         face_confidence: float,
         face_quality: float,
         model: str,
-        vector: Union[Dict[str, float], np.ndarray],
+        vector: dict[str, float] | np.ndarray,
     ) -> None:
         self.filename = filename
         self.x = x
@@ -54,11 +55,11 @@ class FaceRegion(Base):
         self.right_eye = right_eye
         self.face_confidence = face_confidence
         self.face_quality = face_quality
-        self.created_at = datetime.now(timezone.utc)
+        self.created_at = datetime.now(UTC)
         self.model = model
         self.set_vector_by_type(vector, model)
 
-    def set_vector_by_type(self, vector: Union[Dict[str, float], np.ndarray], model: str) -> None:
+    def set_vector_by_type(self, vector: dict[str, float] | np.ndarray, model: str) -> None:
         if isinstance(vector, dict):
             vector = np.array(list(vector.values()), dtype=np.float32)
         if isinstance(vector, list):

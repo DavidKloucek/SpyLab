@@ -1,6 +1,7 @@
-from pathlib import Path
-from decouple import Config, RepositoryEnv  # type: ignore
 import os
+from pathlib import Path
+
+from decouple import Config, RepositoryEnv  # type: ignore
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

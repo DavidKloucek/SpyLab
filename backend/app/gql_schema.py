@@ -1,15 +1,16 @@
+
 import strawberry
-from app.dashboard_service import DashboardService
 from strawberry.fastapi import BaseContext
+
 from app.container import container
-from typing import Type
+from app.dashboard_service import DashboardService
 
 
 class DIContext(BaseContext):
     def __init__(self, scoped):
         self._scoped = scoped
 
-    async def get[T](self, cls: Type[T]) -> T:
+    async def get[T](self, cls: type[T]) -> T:
         return await self._scoped.get(cls)
 
 

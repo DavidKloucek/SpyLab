@@ -1,8 +1,9 @@
-from wireup import service
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from wireup import service
 
 from app.app_config import DATABASE_URL
 
@@ -14,6 +15,6 @@ Base = declarative_base()
 
 @asynccontextmanager
 @service(lifetime="scoped")
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_session() -> AsyncGenerator[AsyncSession]:
     async with async_session_factory() as session:
         yield session

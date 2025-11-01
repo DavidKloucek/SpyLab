@@ -1,23 +1,22 @@
-import wireup
+import wireup.integration.fastapi
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-import wireup.integration
-import wireup.integration.fastapi
-from app.container import container
+from strawberry.fastapi import GraphQLRouter
+
 from app.app_config import (
     ALLOWED_ORIGINS,
     APP_TITLE,
     GQL_PATH,
-    IMG_TEMP_DIR_URL_PATH,
+    IMG_ORIG_DIR,
     IMG_ORIG_DIR_URL_PATH,
     IMG_TEMP_DIR,
-    IMG_ORIG_DIR,
+    IMG_TEMP_DIR_URL_PATH,
 )
-from app.router import router
-from strawberry.fastapi import GraphQLRouter
+from app.container import container
 from app.gql_schema import get_context, schema
+from app.router import router
 
 
 def create_app() -> FastAPI:

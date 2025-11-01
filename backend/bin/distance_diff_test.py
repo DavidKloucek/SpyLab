@@ -1,6 +1,7 @@
+import numpy as np
 from deepface import DeepFace  # type: ignore
 from deepface.modules import verification  # type: ignore
-import numpy as np
+
 from app.helpers import normalize
 
 models = ["Facenet", "Facenet512", "VGG-Face", "ArcFace"]

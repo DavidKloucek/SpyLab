@@ -1,8 +1,9 @@
-from typing import Optional
+
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func
 from wireup import service
+
 from app.user import User
 
 
@@ -25,12 +26,12 @@ class UserRepository:
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
-    async def find_by_email(self, email: str) -> Optional[User]:
+    async def find_by_email(self, email: str) -> User | None:
         q = select(User).filter(User.email == email)
         result = await self._session.execute(q)
         return result.scalars().first()
 
-    async def find_by_id(self, id: int) -> Optional[User]:
+    async def find_by_id(self, id: int) -> User | None:
         q = select(User).filter(User.id == id)
         result = await self._session.execute(q)
         return result.scalars().first()

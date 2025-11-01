@@ -1,14 +1,14 @@
-from wireup import Injected
-from typing import List, Literal
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
+from typing import Literal
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from pydantic import BaseModel, EmailStr, NonNegativeInt
+from wireup import Injected
+
 from app import face_service
 from app.auth_service import AuthService, TokenPayload, fastapi_require_access_token
 from app.dashboard_service import DashboardService, DashStats
 from app.face_model_invoker import NoFaceFound
-from app.face_service import AnalyzeBox, FaceItem, FaceSimilarItem
-from fastapi import Request
-from app.face_service import FaceService
+from app.face_service import AnalyzeBox, FaceItem, FaceService, FaceSimilarItem
 from app.user_repository import UserRepository
 
 """
@@ -30,7 +30,7 @@ class FaceItemResponse(FaceItem):
 
 class DetailData(BaseModel):
     data: FaceItemResponse
-    faces: List[FaceItemResponse]
+    faces: list[FaceItemResponse]
 
 
 @router.get("/detail", response_model=DetailData)
@@ -61,7 +61,7 @@ async def detail_image(
     return DetailData(data=data_resp, faces=faces_resp)
 
 
-@router.get("/list", response_model=List[FaceItemResponse])
+@router.get("/list", response_model=list[FaceItemResponse])
 async def read_random(
     request: Request,
     response: Response,
@@ -69,7 +69,7 @@ async def read_random(
     search: str = "",
     limit: int = 20,
     jwt: TokenPayload = Depends(fastapi_require_access_token),
-) -> List[FaceItemResponse]:
+) -> list[FaceItemResponse]:
     res = await face_service.find_list(limit, search)
     return [
         FaceItemResponse(
@@ -91,7 +91,7 @@ class Meta(BaseModel):
 
 
 class FaceItemResponseContainer(BaseModel):
-    data: List[FaceItemResponse]
+    data: list[FaceItemResponse]
     meta: Meta
 
 
@@ -102,7 +102,7 @@ class ImageData(BaseModel):
 class UploadImageResponse(BaseModel):
     preview_url: str
     source_url: str
-    boxes: List[AnalyzeBox]
+    boxes: list[AnalyzeBox]
 
 
 @router.post("/analyze", response_model=UploadImageResponse)
@@ -125,7 +125,7 @@ async def analyze_image(
         raise HTTPException(status_code=500, detail="No face detected in the image")
 
 
-@router.get("/similar-to-id", response_model=List[FaceSimilarItemResponse])
+@router.get("/similar-to-id", response_model=list[FaceSimilarItemResponse])
 async def find_similar_id(
     request: Request,
     face_service: Injected[FaceService],
@@ -133,7 +133,7 @@ async def find_similar_id(
     model: str,
     metric: str = "cosine",
     jwt: TokenPayload = Depends(fastapi_require_access_token),
-) -> List[FaceSimilarItemResponse]:
+) -> list[FaceSimilarItemResponse]:
     res = await face_service.find_similar_by_face_id(id=id, model=model, metric=metric, limit=50)
 
     return [
@@ -146,7 +146,7 @@ async def find_similar_id(
     ]
 
 
-@router.post("/similar-to-image", response_model=List[FaceSimilarItemResponse])
+@router.post("/similar-to-image", response_model=list[FaceSimilarItemResponse])
 async def find_similar_image(
     request: Request,
     image: UploadFile,
@@ -156,7 +156,7 @@ async def find_similar_image(
     w: int = Form(...),
     h: int = Form(...),
     jwt: TokenPayload = Depends(fastapi_require_access_token),
-) -> List[FaceSimilarItemResponse]:
+) -> list[FaceSimilarItemResponse]:
     res = await face_service.find_similar_by_image(file=image, x=x, y=y, w=w, h=h, limit=100)
 
     return [
@@ -183,7 +183,7 @@ class UserItem(BaseModel):
     email: EmailStr
 
 
-@router.get("/users", response_model=List[UserItem])
+@router.get("/users", response_model=list[UserItem])
 async def user_list(
     request: Request,
     response: Response,
@@ -191,7 +191,7 @@ async def user_list(
     _start: int = 0,
     _end: int = 20,
     jwt: TokenPayload = Depends(fastapi_require_access_token),
-) -> List[UserItem]:
+) -> list[UserItem]:
     data = await user_repo.find_all(_start, _end)
     res = [UserItem(id=u.id, email=u.email) for u in data]
 

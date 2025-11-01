@@ -1,4 +1,5 @@
 import asyncio
+
 from app.container import container
 from app.image_feeder import ImageFeeder
 

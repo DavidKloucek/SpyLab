@@ -1,22 +1,24 @@
-from wireup import Inject, service
 import hashlib
 import tempfile
-from typing import Annotated, List
+from typing import Annotated
+
+import numpy as np
 from fastapi import UploadFile
 from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
 from pydantic.types import PositiveInt
-from app.face_model_invoker import FaceModelInterface
-from app.face_region import FaceRegion
+from wireup import Inject, service
+
 from app.app_config import (
     IMG_ORIG_DIR,
     IMG_TEMP_DIR,
     METRIC_DEFAULT,
     MODEL_DEFAULT,
 )
-from app.image_processor import crop_and_save
+from app.face_model_invoker import FaceModelInterface
+from app.face_region import FaceRegion
 from app.face_repository import FaceRepository
 from app.helpers import str_to_metric_type, str_to_model_type
-import numpy as np
+from app.image_processor import crop_and_save
 
 
 class FaceItem(BaseModel):
@@ -73,7 +75,7 @@ class FaceService:
             h=face.h,
         )
 
-    async def find_list(self, limit: int, search: str) -> List[FaceItem]:
+    async def find_list(self, limit: int, search: str) -> list[FaceItem]:
         return [self.map_face_region_to_item(item) for item in await self._face_repository.find_random(limit, search)]
 
     def create_preview(self, face: FaceRegion) -> str:
@@ -91,14 +93,14 @@ class FaceService:
 
         return new_fn
 
-    async def get_photo_faces_by_filename(self, fn: str) -> List[FaceItem]:
+    async def get_photo_faces_by_filename(self, fn: str) -> list[FaceItem]:
         return [self.map_face_region_to_item(x) for x in await self._face_repository.find_faces_by_image_name(fn)]
 
     async def get_by_id(self, id: int) -> FaceItem:
         return self.map_face_region_to_item(await self._face_repository.get_face_by_id(id))
 
-    async def analyze_image(self, file: UploadFile) -> List[AnalyzeBox]:
-        output: List[AnalyzeBox] = []
+    async def analyze_image(self, file: UploadFile) -> list[AnalyzeBox]:
+        output: list[AnalyzeBox] = []
 
         contents = await file.read()
         # image = Image.open(io.BytesIO(contents), formats=None).convert("RGB")
@@ -135,11 +137,11 @@ class FaceService:
 
     async def find_similar_by_image(
         self, file: UploadFile, x: int, y: int, w: int, h: int, limit: int
-    ) -> List[FaceSimilarItem]:
+    ) -> list[FaceSimilarItem]:
         contents = await file.read()
         # image = Image.open(io.BytesIO(contents)).convert("RGB")
         # img_array = np.array(image)
-        ## cropped_array = img_array[y:y+h, x:x+w, :]
+        # cropped_array = img_array[y:y+h, x:x+w, :]
         # faces_data = self.represent_face(img_path=img_array)
         # TODO
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=True) as tmp:
@@ -164,14 +166,14 @@ class FaceService:
             limit=limit,
         )
 
-    async def find_similar_by_face_id(self, id: int, model: str, metric: str, limit: int) -> List[FaceSimilarItem]:
+    async def find_similar_by_face_id(self, id: int, model: str, metric: str, limit: int) -> list[FaceSimilarItem]:
         face_row = await self._face_repository.get_face_by_id(id)
         target_vector = face_row.get_vector()
         return await self.find_similar_by_vector(target_vector=target_vector, model=model, metric=metric, limit=limit)
 
     async def find_similar_by_vector(
         self, target_vector: np.ndarray, model: str, metric: str, limit: int
-    ) -> List[FaceSimilarItem]:
+    ) -> list[FaceSimilarItem]:
         similar_faces = await self._face_repository.find_similar_faces(
             target_vector=target_vector,
             model=str_to_model_type(model),
@@ -179,7 +181,7 @@ class FaceService:
             limit=limit,
         )
 
-        resp: List[FaceSimilarItem] = []
+        resp: list[FaceSimilarItem] = []
 
         for face, distance in similar_faces:
             new_fn = self.create_preview(face)

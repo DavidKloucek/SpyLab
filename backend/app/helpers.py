@@ -1,8 +1,11 @@
-import numpy as np
-from typing import TypeVar, List, cast, Literal
-from enum import Enum
+from __future__ import annotations
 
-Vector = TypeVar("Vector", bound=List[float])
+from enum import Enum
+from typing import Literal, TypeVar, cast
+
+import numpy as np
+
+Vector = TypeVar("Vector", bound=list[float])
 
 
 class ModelType2(Enum):
@@ -12,7 +15,7 @@ class ModelType2(Enum):
     FACENET512 = "Facenet512"
 
     @staticmethod
-    def from_str(s: str) -> "ModelType2":
+    def from_str(s: str) -> ModelType2:
         try:
             return ModelType2(s)
         except ValueError:
@@ -44,7 +47,7 @@ def normalize(vector: np.ndarray) -> np.ndarray:
 
 
 class Embedding:
-    def __init__(self, embedding_json: List[float]):
+    def __init__(self, embedding_json: list[float]):
         self.embedding_json = embedding_json
 
 

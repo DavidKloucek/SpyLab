@@ -1,10 +1,11 @@
-from abc import ABC, abstractmethod
-from deepface import DeepFace  # type: ignore
-from typing import Annotated, List, Tuple, override
-from pydantic import BaseModel, Field, NonNegativeFloat, NonNegativeInt
-from wireup import Inject, service, abstract
-import httpx
 import mimetypes
+from abc import ABC, abstractmethod
+from typing import Annotated, override
+
+import httpx
+from deepface import DeepFace  # type: ignore
+from pydantic import BaseModel, Field, NonNegativeFloat, NonNegativeInt
+from wireup import Inject, abstract, service
 
 
 class FacialArea(BaseModel):
@@ -12,12 +13,12 @@ class FacialArea(BaseModel):
     y: NonNegativeInt
     w: NonNegativeInt
     h: NonNegativeInt
-    left_eye: Tuple[NonNegativeInt, NonNegativeInt]
-    right_eye: Tuple[NonNegativeInt, NonNegativeInt]
+    left_eye: tuple[NonNegativeInt, NonNegativeInt]
+    right_eye: tuple[NonNegativeInt, NonNegativeInt]
 
 
 class FaceEmbedding(BaseModel):
-    embedding: Annotated[List[float], Field(min_length=1)]
+    embedding: Annotated[list[float], Field(min_length=1)]
     facial_area: FacialArea
     face_confidence: NonNegativeFloat
 

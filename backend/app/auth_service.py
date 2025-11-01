@@ -1,12 +1,14 @@
-from fastapi import Depends, HTTPException, status
-from wireup import service
 from datetime import datetime, timedelta
+
+import bcrypt
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
+from wireup import service
+
 from app import app_config as cfg
 from app.user import User
-import bcrypt
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -31,12 +33,12 @@ class AuthService:
             "email": user.email,
             "exp": expire,
         }
-        private_key = open(cfg.PRIVATE_KEY_PATH, "r").read()
+        private_key = open(cfg.PRIVATE_KEY_PATH).read()
         return jwt.encode(to_encode, private_key, algorithm=cfg.ALGORITHM)
 
     @staticmethod
     def decode_access_token(token: str) -> TokenPayload:
-        public_key = open(cfg.PUBLIC_KEY_PATH, "r").read()
+        public_key = open(cfg.PUBLIC_KEY_PATH).read()
         payload = jwt.decode(token, public_key, algorithms=[cfg.ALGORITHM])
         return TokenPayload(**payload)
 
