@@ -60,7 +60,9 @@ class FaceRepository:
         target_vector: np.ndarray,
         model: ModelType,
         metric: MetricType,
+        offset: int = 0,
         limit: int = 10,
+        quality: int | None = None,
     ) -> list[tuple[FaceRegion, float]]:
         if model == "VGG-Face":
             vector_column = FaceRegion.emb_4096
@@ -90,8 +92,12 @@ class FaceRepository:
             )
             .filter(FaceRegion.model == model)
             .order_by("distance")
+            .offset(offset)
             .limit(limit)
         )
+
+        if quality is not None:
+            query = query.filter(FaceRegion.face_quality == quality)
 
         result = await self._session.execute(query)
         rows = result.all()

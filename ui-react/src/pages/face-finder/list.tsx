@@ -3,8 +3,8 @@ import {
     useModal,
     useTable,
 } from "@refinedev/antd";
-import { useCustomMutation } from "@refinedev/core";
-import { Badge, Modal, Table, Tooltip } from "antd";
+import { LogicalFilter, useCustomMutation } from "@refinedev/core";
+import { Badge, Modal, Space, Switch, Table, Tooltip } from "antd";
 import { FaceBox, FacePicker } from "../../components/FacePicker";
 import { useEffect, useState } from "react";
 import { FaceSearchPanel } from "../../components/FaceSearchPanel";
@@ -12,9 +12,13 @@ import { FaceSimilarItemResponse } from "../../api/generated";
 
 export const FaceFinderList = () => {
 
-    const { tableProps, } = useTable({
+    const { tableProps, filters, setFilters } = useTable({
         syncWithLocation: false,
         queryOptions: { enabled: false },
+        pagination: {
+            pageSize: 50,
+            mode: "client"
+        }
     });
 
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -30,12 +34,18 @@ export const FaceFinderList = () => {
     }, [modal, showDetails])
 
     const [similarList, setSimilarList] = useState<FaceSimilarItemResponse[]>([])
-    const mutation = useCustomMutation<FaceSimilarItemResponse[]>();
+    const { mutateAsync, ...mutation } = useCustomMutation<FaceSimilarItemResponse[]>();
 
     useEffect(() => {
         const call = async () => {
             if (selectedBox && selectedImage) {
-                const m = await mutation.mutateAsync({
+                const reqFilters = new Map()
+                for (const filter of filters) {
+                    if ("field" in filter) {
+                        reqFilters.set(filter.field, filter.value)
+                    }
+                }
+                const m = await mutateAsync({
                     url: "/api/similar-to-image",
                     method: "post",
                     config: {
@@ -46,14 +56,15 @@ export const FaceFinderList = () => {
                         y: selectedBox?.y,
                         w: selectedBox?.w,
                         h: selectedBox?.h,
-                        image: selectedImage
+                        image: selectedImage,
+                    ...Object.fromEntries(reqFilters)
                     }
                 });
                 setSimilarList(m.data)
             }
         }
         call()
-    }, [selectedBox, selectedImage])
+    }, [selectedBox, selectedImage, filters, mutateAsync])
 
     return <>
         <Modal
@@ -90,6 +101,25 @@ export const FaceFinderList = () => {
             }}
         />
         <List title={<>Similar faces</>}>
+            <Space align="start">
+                <div style={{ float: "right" }}>
+                    <Switch
+                        checked={filters.find(x => x.value == 1)?.value}
+                        onChange={(checked) => {
+                            setFilters([
+                                {
+                                    field: "quality",
+                                    operator: "eq",
+                                    value: checked ? 1 : null,
+                                } satisfies LogicalFilter,
+                            ],
+                                "replace");
+                        }}
+                        style={{ marginLeft: 8 }}
+                    />
+                    <span style={{ marginLeft: 8 }}>High quality</span>
+                </div>
+            </Space>
             <Table
                 {...tableProps}
                 dataSource={similarList}
@@ -109,7 +139,7 @@ export const FaceFinderList = () => {
                 />
                 <Table.Column
                     dataIndex="quality"
-                    title={"Quality"}
+                    title={"Image quality"}
                     align="center"
                     render={(value) => (
                         value > 0
@@ -145,6 +175,7 @@ export const FaceFinderList = () => {
                     title={"Preview"}
                     render={(value, row: FaceSimilarItemResponse) => {
                         return <img
+                            loading="lazy"
                             src={value}
                             style={{ maxHeight: '100px', maxWidth: '100px' }}
                             onClick={() => {

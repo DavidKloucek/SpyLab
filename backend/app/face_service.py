@@ -118,7 +118,9 @@ class FaceService:
                 target_vector=np.array(emb),
                 model=str_to_model_type(MODEL_DEFAULT),
                 metric=str_to_metric_type(METRIC_DEFAULT),
+                offset=0,
                 limit=100,
+                quality=1,
             )
             similar_faces = [item for item in similar_faces if item.distance <= self._model_thresholds[MODEL_DEFAULT]]
 
@@ -136,7 +138,7 @@ class FaceService:
         return output
 
     async def find_similar_by_image(
-        self, file: UploadFile, x: int, y: int, w: int, h: int, limit: int
+        self, file: UploadFile, x: int, y: int, w: int, h: int, limit: int, offset: int, quality: int | None
     ) -> list[FaceSimilarItem]:
         contents = await file.read()
         # image = Image.open(io.BytesIO(contents)).convert("RGB")
@@ -163,22 +165,29 @@ class FaceService:
             target_vector=np.array(vector),
             model=MODEL_DEFAULT,
             metric=METRIC_DEFAULT,
+            quality=quality,
             limit=limit,
+            offset=offset,
         )
 
-    async def find_similar_by_face_id(self, id: int, model: str, metric: str, limit: int) -> list[FaceSimilarItem]:
+    async def find_similar_by_face_id(
+        self, id: int, model: str, metric: str, limit: int, quality: int | None
+    ) -> list[FaceSimilarItem]:
         face_row = await self._face_repository.get_face_by_id(id)
         target_vector = face_row.get_vector()
-        return await self.find_similar_by_vector(target_vector=target_vector, model=model, metric=metric, limit=limit)
+        return await self.find_similar_by_vector(
+            target_vector=target_vector, model=model, metric=metric, limit=limit, quality=quality, offset=0
+        )
 
     async def find_similar_by_vector(
-        self, target_vector: np.ndarray, model: str, metric: str, limit: int
+        self, target_vector: np.ndarray, model: str, metric: str, limit: int, offset: int, quality: int | None
     ) -> list[FaceSimilarItem]:
         similar_faces = await self._face_repository.find_similar_faces(
             target_vector=target_vector,
             model=str_to_model_type(model),
             metric=str_to_metric_type(metric),
             limit=limit,
+            quality=quality,
         )
 
         resp: list[FaceSimilarItem] = []

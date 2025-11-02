@@ -33,6 +33,11 @@ class DetailData(BaseModel):
     faces: list[FaceItemResponse]
 
 
+def append_pagination_headers(response: Response, total_count: int) -> None:
+    response.headers["X-Total-Count"] = str(total_count)
+    response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
+
+
 @router.get("/detail", response_model=DetailData)
 async def detail_image(
     request: Request,
@@ -134,7 +139,7 @@ async def find_similar_id(
     metric: str = "cosine",
     jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> list[FaceSimilarItemResponse]:
-    res = await face_service.find_similar_by_face_id(id=id, model=model, metric=metric, limit=50)
+    res = await face_service.find_similar_by_face_id(id=id, model=model, metric=metric, limit=50, quality=None)
 
     return [
         FaceSimilarItemResponse(
@@ -149,15 +154,19 @@ async def find_similar_id(
 @router.post("/similar-to-image", response_model=list[FaceSimilarItemResponse])
 async def find_similar_image(
     request: Request,
+    response: Response,
     image: UploadFile,
     face_service: Injected[FaceService],
     x: int = Form(...),
     y: int = Form(...),
     w: int = Form(...),
     h: int = Form(...),
+    quality: int | None = Form(None),
     jwt: TokenPayload = Depends(fastapi_require_access_token),
 ) -> list[FaceSimilarItemResponse]:
-    res = await face_service.find_similar_by_image(file=image, x=x, y=y, w=w, h=h, limit=100)
+    res = await face_service.find_similar_by_image(file=image, x=x, y=y, w=w, h=h, limit=100, offset=0, quality=quality)
+
+    append_pagination_headers(response, len(res))
 
     return [
         FaceSimilarItemResponse(
@@ -194,10 +203,7 @@ async def user_list(
 ) -> list[UserItem]:
     data = await user_repo.find_all(_start, _end)
     res = [UserItem(id=u.id, email=u.email) for u in data]
-
-    total_count = len(res)
-    response.headers["X-Total-Count"] = str(total_count)
-    response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
+    append_pagination_headers(response, len(res))
     return res
 
 
