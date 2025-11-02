@@ -65,6 +65,9 @@ export const authProvider: AuthProvider = {
         }
     },
     logout: async () => {
+        try {
+            await axiosClient.post("/api/logout", {}, { withCredentials: true });
+        } catch (err) { }
         loggedUser.data = null
         return {
             success: true,
@@ -78,7 +81,16 @@ export const authProvider: AuthProvider = {
                 authenticated: true,
             };
         }
-
+        try {
+            const meReq = await axiosClient.get("/api/me", {
+                withCredentials: true
+            });
+            if (meReq.status === 200) {
+                return {
+                    authenticated: true,
+                };
+            }
+        } catch (err) { }
         return {
             authenticated: false,
             redirectTo: "/login",

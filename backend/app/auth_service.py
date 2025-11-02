@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import bcrypt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
@@ -43,7 +43,22 @@ class AuthService:
         return TokenPayload(**payload)
 
 
-def fastapi_require_access_token(token: str = Depends(oauth2_scheme)) -> TokenPayload:
+def get_access_token(request: Request) -> str:
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        return auth_header.split(" ")[1]
+
+    token = request.cookies.get(cfg.ACCESS_TOKEN_COOKIE_NAME)
+    if token:
+        return token
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+    )
+
+
+def fastapi_require_access_token(token: str = Depends(get_access_token)) -> TokenPayload:
     try:
         return AuthService.decode_access_token(token)
     except JWTError:

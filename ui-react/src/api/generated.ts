@@ -280,6 +280,13 @@ export const getSpyLab = () => {
   };
 
   /**
+   * @summary Logout
+   */
+  const logoutApiLogoutPost = () => {
+    return orvalMutator<unknown>({ url: `/api/logout`, method: "POST" });
+  };
+
+  /**
    * @summary Get Me
    */
   const getMeApiMeGet = () => {
@@ -309,6 +316,7 @@ export const getSpyLab = () => {
     dashboardApiDashboardGet,
     userListApiUsersGet,
     loginApiLoginPost,
+    logoutApiLogoutPost,
     getMeApiMeGet,
     handleHttpGetGraphqlGet,
     handleHttpPostGraphqlPost,
@@ -345,6 +353,9 @@ export type UserListApiUsersGetResult = NonNullable<
 >;
 export type LoginApiLoginPostResult = NonNullable<
   Awaited<ReturnType<ReturnType<typeof getSpyLab>["loginApiLoginPost"]>>
+>;
+export type LogoutApiLogoutPostResult = NonNullable<
+  Awaited<ReturnType<ReturnType<typeof getSpyLab>["logoutApiLogoutPost"]>>
 >;
 export type GetMeApiMeGetResult = NonNullable<
   Awaited<ReturnType<ReturnType<typeof getSpyLab>["getMeApiMeGet"]>>

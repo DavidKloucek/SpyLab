@@ -1,10 +1,12 @@
 from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi import status as statusList
 from pydantic import BaseModel, EmailStr, NonNegativeInt
 from wireup import Injected
 
 from app import face_service
+from app.app_config import ACCESS_TOKEN_COOKIE_NAME
 from app.auth_service import AuthService, TokenPayload, fastapi_require_access_token
 from app.dashboard_service import DashboardService, DashStats
 from app.face_model_invoker import NoFaceFound
@@ -219,6 +221,7 @@ class LoginResponse(BaseModel):
 
 @router.post("/login", response_model=LoginResponse)
 async def login(
+    response: Response,
     request: LoginRequest,
     user_repo: Injected[UserRepository],
 ) -> LoginResponse:
@@ -227,7 +230,18 @@ async def login(
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     token = AuthService.create_access_token(user)
+
+    response.set_cookie(
+        key=ACCESS_TOKEN_COOKIE_NAME, value=token, httponly=True, secure=True, samesite="none", max_age=3600
+    )
+
     return LoginResponse(token=token, token_type="bearer")
+
+
+@router.post("/logout", status_code=statusList.HTTP_204_NO_CONTENT, response_class=Response)
+def logout(response: Response) -> Response:
+    response.delete_cookie(key=ACCESS_TOKEN_COOKIE_NAME, httponly=True, secure=True, samesite="none")
+    return Response(status_code=statusList.HTTP_204_NO_CONTENT)
 
 
 class MeDto(BaseModel):

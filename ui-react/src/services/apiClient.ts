@@ -45,11 +45,11 @@ function setAuthHeaderOnConfig(
     cfg: Pick<AxiosRequestConfig, "headers">,
     token: string
 ): void {
-    if (cfg.headers instanceof AxiosHeaders) {
+    /*if (cfg.headers instanceof AxiosHeaders) {
         cfg.headers.set("Authorization", `Bearer ${token}`);
     } else {
         cfg.headers = { ...(cfg.headers || {}), Authorization: `Bearer ${token}` };
-    }
+    }*/
 }
 
 async function ensureRefreshed(): Promise<void> {

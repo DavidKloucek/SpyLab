@@ -16,6 +16,7 @@ IMG_TEMP_DIR = Path(os.path.abspath(os.path.join(BASE_DIR, str(config("IMG_TEMP_
 PRIVATE_KEY_PATH = Path(os.path.abspath(os.path.join(BASE_DIR, str(config("PRIVATE_KEY_PATH")))))
 PUBLIC_KEY_PATH = Path(os.path.abspath(os.path.join(BASE_DIR, str(config("PUBLIC_KEY_PATH")))))
 
+ACCESS_TOKEN_COOKIE_NAME = "access_token"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(config("ACCESS_TOKEN_EXPIRE_MINUTES"))
 ALGORITHM = str(config("ALGORITHM"))
 
